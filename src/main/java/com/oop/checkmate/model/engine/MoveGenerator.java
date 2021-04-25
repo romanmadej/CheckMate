@@ -17,7 +17,7 @@ public class MoveGenerator {
 	}
 
 	// works under assumption that QUIET and CAPTURE are only valid MoveTypes
-	private static long generatePseudoMovesBitboard(MoveType moveType, Constants.Color color,
+	public static long generatePseudoMovesBitboard(MoveType moveType, Constants.Color color,
 			Constants.PieceType pieceType, int squareId, long alliesBB, long opponentsBB) {
 		if (pieceType != ROOK && pieceType != BISHOP && pieceType != QUEEN) {
 
