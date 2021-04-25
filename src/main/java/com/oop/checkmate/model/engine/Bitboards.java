@@ -1,7 +1,5 @@
 package com.oop.checkmate.model.engine;
 
-import com.oop.checkmate.Constants;
-
 import static com.oop.checkmate.Constants.Color.BLACK;
 import static com.oop.checkmate.Constants.Color.WHITE;
 import static com.oop.checkmate.Constants.PieceType.*;
@@ -9,21 +7,27 @@ import static com.oop.checkmate.model.engine.BitboardUtils.*;
 import static com.oop.checkmate.model.engine.EngineConstants.*;
 import static com.oop.checkmate.model.engine.EngineConstants.Square.A1;
 
+import com.oop.checkmate.Constants;
+
 /*
 Bitboard constants precalculated
  */
 
-public class Bitboards {
+class Bitboards {
+	private Bitboards() {
+	}
+
 	// have to be 0 initialized
-	public static final long[][] pawnAttacks = new long[COLOR_N][SQUARE_N];
-	public static final long[][] pawnPush = new long[COLOR_N][SQUARE_N];
-	public static final long[][] pseudoAttacks = new long[PIECE_TYPE_N][SQUARE_N];
+	protected static final long[][] pawnAttacks = new long[COLOR_N][SQUARE_N];
+	protected static final long[][] pawnPush = new long[COLOR_N][SQUARE_N];
+	protected static final long[][] pseudoAttacks = new long[PIECE_TYPE_N][SQUARE_N];
 
 	static {
 		init();
+
 	}
 
-	public static void init() {
+	private static void init() {
 		for (int square = A1.id; square < SQUARE_N; square++) {
 			long sqBB = (1L << square);
 			pawnPush[WHITE.id][square] = shift_N(sqBB);
@@ -53,7 +57,7 @@ public class Bitboards {
 		}
 	}
 
-	public static long slidingPseudoAttacks(Constants.PieceType pt, int square, long occupiedBB, long opponentsBB) {
+	protected static long slidingPseudoAttacks(Constants.PieceType pt, int square, long occupiedBB, long opponentsBB) {
 		if (pt != Constants.PieceType.ROOK && pt != Constants.PieceType.BISHOP)
 			throw new RuntimeException("method accepts only Rooks and Bishops");
 

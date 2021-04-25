@@ -1,6 +1,8 @@
 package com.oop.checkmate.model.engine;
 
 public final class EngineConstants {
+	private EngineConstants() {
+	}
 
 	// cardinalities
 	public final static int PIECE_TYPE_N = 6, SQUARE_N = 64, COLOR_N = 2;
