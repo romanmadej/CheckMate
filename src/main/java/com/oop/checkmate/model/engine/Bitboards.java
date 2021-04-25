@@ -27,7 +27,13 @@ public class Bitboards {
 		for (int square = A1.id; square < SQUARE_N; square++) {
 			long sqBB = (1L << square);
 			pawnPush[WHITE.id][square] = shift_N(sqBB);
+			if(square/8 == 1){
+				pawnPush[WHITE.id][square] = shift_N(shift_N(sqBB));
+			}
 			pawnPush[BLACK.id][square] = shift_S(sqBB);
+			if(square/8 == 6){
+				pawnPush[BLACK.id][square] = shift_S(shift_S(sqBB));
+			}
 
 			pawnAttacks[WHITE.id][square] = shift_NE(sqBB) | shift_NW(sqBB);
 			pawnAttacks[BLACK.id][square] = shift_SE(sqBB) | shift_SW(sqBB);
