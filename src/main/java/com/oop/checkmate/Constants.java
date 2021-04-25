@@ -1,6 +1,8 @@
 package com.oop.checkmate;
 
 public class Constants {
+	public static final int SQUARE_SIZE = 64;
+
 	public enum PieceType {
 		PAWN(), KNIGHT(), BISHOP(), ROOK(), QUEEN(), KING();
 

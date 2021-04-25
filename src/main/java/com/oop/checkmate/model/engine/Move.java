@@ -1,5 +1,9 @@
 package com.oop.checkmate.model.engine;
 
+import java.util.Objects;
+
+import com.oop.checkmate.model.Position;
+
 public class Move {
 	/*
 	 * 32 bit words are used for representing a move bits: 0-5 from square 6-11
@@ -19,5 +23,29 @@ public class Move {
 
 	public boolean isCapture() {
 		return (moveBB >>> 12) == 4;
+	}
+
+	public Position getFromPosition() {
+		int id = (int) (moveBB & ((1L << 6) - 1));
+		return Position.fromSquareId(id);
+	}
+
+	public Position getToPosition() {
+		int id = (int) ((moveBB >>> 6) & ((1L << 6) - 1));
+		return Position.fromSquareId(id);
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (!(o instanceof Move)) {
+			return false;
+		}
+		Move move = (Move) o;
+		return moveBB == move.moveBB;
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(moveBB);
 	}
 }

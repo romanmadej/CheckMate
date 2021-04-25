@@ -1,15 +1,16 @@
 package com.oop.checkmate.model.engine;
 
-import com.oop.checkmate.Constants;
-
-import java.util.ArrayList;
-import java.util.List;
-
 import static com.oop.checkmate.Constants.PieceType.*;
 import static com.oop.checkmate.model.engine.Bitboards.*;
 import static com.oop.checkmate.model.engine.EngineConstants.MoveType;
 import static com.oop.checkmate.model.engine.EngineConstants.MoveType.CAPTURE;
 import static com.oop.checkmate.model.engine.EngineConstants.MoveType.QUIET;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import com.oop.checkmate.Constants;
+import com.oop.checkmate.model.Piece;
 
 public class MoveGenerator {
 	// works under assumption that QUIET and CAPTURE are only valid MoveTypes
@@ -34,13 +35,13 @@ public class MoveGenerator {
 				& (moveType == QUIET ? ~(alliesBB | opponentsBB) : opponentsBB);
 	}
 
-	public static List<Move> generatePseudoMoves(int squareId, Constants.Color color, Constants.PieceType pieceType,
-			long alliesBitboard, long opponentsBitboard) {
+	public static List<Move> generatePseudoMoves(int squareId, Piece piece, long alliesBitboard,
+			long opponentsBitboard) {
 		List<Move> moves = new ArrayList<>();
 
 		// using naive scan for now
-		long movesBB = generatePseudoMovesBitboard(QUIET, color, pieceType, squareId, alliesBitboard,
-				opponentsBitboard);
+		long movesBB = generatePseudoMovesBitboard(QUIET, piece.getColor(), piece.getPieceType(), squareId,
+				alliesBitboard, opponentsBitboard);
 		BitboardUtils.printBB(movesBB);
 		for (long i = 0; i < 64; i++) {
 			if (((1L << i) & movesBB) != 0) {
@@ -48,7 +49,8 @@ public class MoveGenerator {
 			}
 		}
 
-		movesBB = generatePseudoMovesBitboard(CAPTURE, color, pieceType, squareId, alliesBitboard, opponentsBitboard);
+		movesBB = generatePseudoMovesBitboard(CAPTURE, piece.getColor(), piece.getPieceType(), squareId, alliesBitboard,
+				opponentsBitboard);
 		BitboardUtils.printBB(movesBB);
 		for (long i = 0; i < 64; i++) {
 			if (((1L << i) & movesBB) != 0) {
