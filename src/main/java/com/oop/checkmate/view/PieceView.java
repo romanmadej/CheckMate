@@ -16,7 +16,7 @@ public class PieceView extends ImageView {
 		for (Constants.PieceType pieceType : Constants.PieceType.values()) {
 			for (Constants.Color color : Constants.Color.values()) {
 				images[color.ordinal()][pieceType.ordinal()] = new Image(
-						"/" + color.name() + "_" + pieceType.name() + ".png");
+						"/" + color.name().toLowerCase() + "_" + pieceType.name().toLowerCase() + ".png");
 			}
 		}
 	}
