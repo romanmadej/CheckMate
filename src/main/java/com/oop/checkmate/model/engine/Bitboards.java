@@ -18,9 +18,9 @@ class Bitboards {
 	}
 
 	// have to be 0 initialized
-	protected static final long[][] pawnAttacks = new long[COLOR_N][SQUARE_N];
-	protected static final long[][] pawnPush = new long[COLOR_N][SQUARE_N];
-	protected static final long[][] pseudoAttacks = new long[PIECE_TYPE_N][SQUARE_N];
+	static final long[][] pawnAttacks = new long[COLOR_N][SQUARE_N];
+	static final long[][] pawnPush = new long[COLOR_N][SQUARE_N];
+	static final long[][] pseudoAttacks = new long[PIECE_TYPE_N][SQUARE_N];
 
 	static {
 		init();
@@ -57,7 +57,7 @@ class Bitboards {
 		}
 	}
 
-	protected static long slidingPseudoAttacks(Constants.PieceType pt, int square, long occupiedBB, long opponentsBB) {
+	static long slidingPseudoAttacks(Constants.PieceType pt, int square, long occupiedBB, long opponentsBB) {
 		if (pt != Constants.PieceType.ROOK && pt != Constants.PieceType.BISHOP)
 			throw new RuntimeException("method accepts only Rooks and Bishops");
 
