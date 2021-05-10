@@ -10,6 +10,7 @@ import com.oop.checkmate.model.Board;
 import com.oop.checkmate.model.Piece;
 import com.oop.checkmate.model.Position;
 import com.oop.checkmate.model.engine.Move;
+import com.oop.checkmate.model.engine.ePosition;
 import com.oop.checkmate.view.BoardView;
 import com.oop.checkmate.view.PieceView;
 
@@ -27,9 +28,12 @@ public class BoardController {
 
 	private final Board boardModel;
 
+	private ePosition ePos;
+
 	public BoardController() {
 		this.boardModel = new Board();
 		this.boardView = new BoardView();
+		this.ePos = new ePosition();
 
 		InputHandler inputHandler = new InputHandler();
 
@@ -65,7 +69,7 @@ public class BoardController {
 				System.out.println("source: " + initialPosition);
 
 				boardView.resetHighlight();
-				legalMoves = boardModel.getLegalMoves(initialPosition);
+				legalMoves = boardModel.getLegalMoves(initialPosition, ePos);
 				boardView.highlightTiles(legalMoves.stream().map(Move::getToPosition).collect(Collectors.toList()));
 				pieceView.setViewOrder(-1);
 			};
@@ -98,6 +102,9 @@ public class BoardController {
 				Optional<Move> move = legalMoves.stream().filter(m -> m.getToPosition().equals(position)).findFirst();
 				if (move.isPresent()) {
 					boardModel.makeMove(move.get());
+					ePos = ePos.make_move(move.get());
+					// ePos.print();
+
 					if (move.get().isCapture()) {
 						boardView.getChildren().remove(pieceView);
 						boardView.getChildren().remove(boardView.getPieceView(position));

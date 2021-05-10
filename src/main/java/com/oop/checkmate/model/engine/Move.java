@@ -15,10 +15,26 @@ public class Move {
 
 	private long moveBB;
 
-	public Move(long from, long to, long moveType) {
-		moveBB |= from;
+	public Move(int from, int to, long moveType) {
+		moveBB = from;
 		moveBB |= (to << 6);
 		moveBB |= (moveType << 12);
+	}
+
+	public Move(int from, int to, EngineConstants.MoveType moveType) {
+		moveBB = from;
+		moveBB |= (to << 6);
+		moveBB |= (moveType.id << 12);
+	}
+
+	int getFrom() {
+		return (int) (moveBB & ((1L << 6) - 1));
+	}
+	int getTo() {
+		return (int) ((moveBB >>> 6) & ((1L << 6) - 1));
+	}
+	int getMoveType() {
+		return (int) ((moveBB >>> 12) & ((1L << 6) - 1));
 	}
 
 	public boolean isCapture() {
@@ -47,5 +63,10 @@ public class Move {
 	@Override
 	public int hashCode() {
 		return Objects.hash(moveBB);
+	}
+
+	@Override
+	public String toString() {
+		return this.getFrom() + " -> " + this.getTo() + "   " + this.getMoveType();
 	}
 }

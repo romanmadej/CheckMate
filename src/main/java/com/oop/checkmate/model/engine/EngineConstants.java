@@ -1,5 +1,13 @@
 package com.oop.checkmate.model.engine;
 
+import static com.oop.checkmate.Constants.Color;
+import static com.oop.checkmate.Constants.Color.BLACK;
+import static com.oop.checkmate.Constants.Color.WHITE;
+import static com.oop.checkmate.Constants.PieceType.*;
+import static com.oop.checkmate.model.engine.BitboardUtils.squareBB;
+
+import com.oop.checkmate.Constants;
+
 public final class EngineConstants {
 	private EngineConstants() {
 	}
@@ -22,7 +30,7 @@ public final class EngineConstants {
 			Rank8BB };
 
 	public enum MoveType {
-		QUIET(0), CAPTURE(1L << 2);
+		QUIET(0), CAPTURE(1L << 2), EVASION(1);
 
 		public final long id;
 
@@ -38,13 +46,27 @@ public final class EngineConstants {
 		G7(), H7(), A8(), B8(), C8(), D8(), E8(), F8(), G8(), H8();
 
 		public final int id;
+		public final long BB;
 
 		Square() {
 			this.id = this.ordinal();
+			this.BB = squareBB(this.id);
+		}
+	}
+
+	public enum ePiece {
+		NO_PIECE(null, null), W_PAWN(WHITE, PAWN), W_KNIGHT(WHITE, KNIGHT), W_BISHOP(WHITE, BISHOP), W_ROOK(WHITE,
+				ROOK), W_QUEEN(WHITE, QUEEN), W_KING(WHITE, KING), B_PAWN(BLACK, PAWN), B_KNIGHT(BLACK,
+						KNIGHT), B_BISHOP(BLACK,
+								BISHOP), B_ROOK(BLACK, ROOK), B_QUEEN(BLACK, QUEEN), B_KING(BLACK, KING);
+
+		Color color;
+		Constants.PieceType pieceType;
+
+		ePiece(Color c, Constants.PieceType pt) {
+			this.color = c;
+			this.pieceType = pt;
 		}
 
-		Square(int id) {
-			this.id = id;
-		}
 	}
 }

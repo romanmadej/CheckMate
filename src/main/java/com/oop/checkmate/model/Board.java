@@ -5,7 +5,7 @@ import static com.oop.checkmate.Constants.Color;
 import java.util.List;
 
 import com.oop.checkmate.model.engine.Move;
-import com.oop.checkmate.model.engine.MoveGenerator;
+import com.oop.checkmate.model.engine.ePosition;
 
 public class Board {
 	private final Piece[][] chessBoard = new Piece[8][8];
@@ -55,11 +55,8 @@ public class Board {
 		return bitBoard;
 	}
 
-	public List<Move> getLegalMoves(Position position) {
-		Piece ally = chessBoard[position.y][position.x];
-		long alliesBB = getBitboard(ally.getColor());
-		long opponentsBB = getBitboard(ally.getColor().inverse());
-		return MoveGenerator.generatePseudoMoves(position.getSquareId(), ally, alliesBB, opponentsBB);
+	public List<Move> getLegalMoves(Position position, ePosition ePos) {
+		return ePos.getLegalMoves(position.getSquareId());
 	}
 
 	public void makeMove(Move m) {

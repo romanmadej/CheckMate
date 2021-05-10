@@ -1,11 +1,53 @@
 package com.oop.checkmate.model.engine;
 
+import static com.oop.checkmate.Constants.PieceType.BISHOP;
+import static com.oop.checkmate.Constants.PieceType.ROOK;
+import static com.oop.checkmate.model.engine.Bitboards.betweenBB;
+import static com.oop.checkmate.model.engine.Bitboards.pseudoAttacks;
 import static com.oop.checkmate.model.engine.EngineConstants.*;
 import static java.lang.Math.abs;
 import static java.lang.Math.max;
 
 class BitboardUtils {
 	private BitboardUtils() {
+	}
+
+	static final long lsb_magic = 0x022fdd63cc95386dL; // the 4061955.
+
+	static final int lsb_magictable[] = {0, 1, 2, 53, 3, 7, 54, 27, 4, 38, 41, 8, 34, 55, 48, 28, 62, 5, 39, 46, 44, 42,
+			22, 9, 24, 35, 59, 56, 49, 18, 29, 11, 63, 52, 6, 26, 37, 40, 33, 47, 61, 45, 43, 21, 23, 58, 17, 10, 51,
+			25, 36, 32, 60, 20, 57, 16, 50, 31, 19, 15, 30, 14, 13, 12,};
+	// returns log2(lsb) i.e. index of lsb
+	static int get_lsb(long BB) {
+		return lsb_magictable[(int) (((BB & -BB) * lsb_magic) >>> 58)];
+	}
+
+	static long get_lsbBB(long BB) {
+		return 1L << lsb_magictable[(int) (((BB & -BB) * lsb_magic) >>> 58)];
+	}
+
+	static boolean more_than_one_bit(long BB) {
+		return (BB & ~get_lsbBB(BB)) != 0;
+	}
+
+	static long lineBB(int a, int b) {
+		long aBB = 1L << a;
+		long bBB = 1L << b;
+		if ((pseudoAttacks[ROOK.id][a] & bBB) != 0)
+			return (pseudoAttacks[ROOK.id][a] & pseudoAttacks[ROOK.id][b]) | aBB | bBB;
+		if ((pseudoAttacks[BISHOP.id][a] & bBB) != 0)
+			return (pseudoAttacks[BISHOP.id][a] & pseudoAttacks[BISHOP.id][b]) | aBB | bBB;
+		throw new IllegalStateException("there is no line between 'a' and 'b'");
+	}
+
+	// returns bb of squares between a and b(both side exclusive)
+	static long betweenBB(long a, long b) {
+		if (more_than_one_bit(a) || more_than_one_bit(b))
+			throw new IllegalArgumentException("betweenBB parameter has more than one bit set");
+		return betweenBB[get_lsb(a)][get_lsb(b)];
+	}
+	static long betweenBB(int a, int b) {
+		return betweenBB[a][b];
 	}
 
 	static int maxDist(int aSquare, int bSquare) {
