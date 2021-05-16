@@ -17,13 +17,13 @@ public class Move {
 
 	public Move(int from, int to, long moveType) {
 		moveBB = from;
-		moveBB |= (to << 6);
+		moveBB |= ((long) to << 6);
 		moveBB |= (moveType << 12);
 	}
 
 	public Move(int from, int to, EngineConstants.MoveType moveType) {
 		moveBB = from;
-		moveBB |= (to << 6);
+		moveBB |= ((long) to << 6);
 		moveBB |= (moveType.id << 12);
 	}
 
@@ -45,7 +45,14 @@ public class Move {
 
 	public boolean isEpCapture() {
 		return (moveBB >>> 12) == 5;
+	}
 
+	public boolean isKingsideCastling() {
+		return (moveBB >>> 12) == 2;
+	}
+
+	public boolean isQueensideCastling() {
+		return (moveBB >>> 12) == 3;
 	}
 
 	public Position getFromPosition() {

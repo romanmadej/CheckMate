@@ -30,9 +30,11 @@ public final class EngineConstants {
 	final static long[] Ranks = new long[]{RANK1BB, RANK2BB, RANK3BB, RANK4BB, RANK5BB, RANK6BB, RANK7BB,
 			RANK8BB};
 
+	final static byte WHITE_OO = 1, WHITE_OOO = 2, BLACK_OO = 4, BLACK_OOO = 8;
+
 	enum MoveType {
 		//move encoding based on https://www.chessprogramming.org/Encoding_Moves
-		QUIET(0), CAPTURE(1L << 2), EP_CAPTURE(5);
+		QUIET(0), CAPTURE(1L << 2), EP_CAPTURE(5), KINGSIDE_CASTLE(2), QUEENSIDE_CASTLE(3);
 
 		public final long id;
 

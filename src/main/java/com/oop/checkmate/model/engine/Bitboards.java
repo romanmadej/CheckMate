@@ -175,10 +175,14 @@ class Bitboards {
 	static long lineBB(int a, int b) {
 		long aBB = 1L << a;
 		long bBB = 1L << b;
-		if ((pseudoAttacks[ROOK.id][a] & bBB) != 0)
-			return (pseudoAttacks[ROOK.id][a] & pseudoAttacks[ROOK.id][b]) | aBB | bBB;
-		if ((pseudoAttacks[BISHOP.id][a] & bBB) != 0)
-			return (pseudoAttacks[BISHOP.id][a] & pseudoAttacks[BISHOP.id][b]) | aBB | bBB;
+		long aRook = slidingPseudoAttacks(ROOK, a, bBB, bBB);
+		long bRook = slidingPseudoAttacks(ROOK, b, aBB, aBB);
+		long aBishop = slidingPseudoAttacks(BISHOP, a, bBB, bBB);
+		long bBishop = slidingPseudoAttacks(BISHOP, b, aBB, aBB);
+		if ((aRook & bBB) != 0)
+			return (aRook & bRook) | aBB | bBB;
+		if ((aBishop & bBB) != 0)
+			return (aBishop & bBishop) | aBB | bBB;
 		throw new IllegalStateException("there is no line between 'a' and 'b'");
 	}
 }

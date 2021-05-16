@@ -102,7 +102,6 @@ public class BoardController {
 
 				Optional<Move> move = legalMoves.stream().filter(m -> m.getToPosition().equals(position)).findFirst();
 				if (move.isPresent()) {
-					// ePos.print();
 
 					if (move.get().isCapture()) {
 						boardView.getChildren().remove(pieceView);
@@ -116,9 +115,24 @@ public class BoardController {
 						boardView.getChildren().remove(boardView.getPieceView(new Position(capturedX, capturedY)));
 						boardView.getChildren().add(pieceView);
 					}
+					if (move.get().isKingsideCastling()) {
+						int rookFromX = 7;
+						int rookFromY = ePos.getSideToMove() == WHITE ? 7 : 0;
+						PieceView rookPieceView = boardView.getPieceView(new Position(rookFromX, rookFromY));
+						int rookToY = ePos.getSideToMove() == WHITE ? 7 : 0;
+						rookPieceView.setPosition(new Position(5, rookFromY));
+					}
+					if (move.get().isQueensideCastling()) {
+						int rookFromX = 0;
+						int rookFromY = ePos.getSideToMove() == WHITE ? 7 : 0;
+						PieceView rookPieceView = boardView.getPieceView(new Position(rookFromX, rookFromY));
+						int rookToY = ePos.getSideToMove() == WHITE ? 7 : 0;
+						rookPieceView.setPosition(new Position(3, rookFromY));
+					}
 
 					boardModel.makeMove(move.get());
 					ePos = ePos.make_move(move.get());
+//					ePos.print();
 					pieceView.setPosition(position);
 					boardView.highlightMove(move.get());
 				} else {

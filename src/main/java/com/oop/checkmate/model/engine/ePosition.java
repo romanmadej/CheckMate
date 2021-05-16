@@ -27,7 +27,7 @@ public class ePosition {
 	static final List<Move> EMPTY_LIST = new ArrayList<>();
 	int epSquare;
 	//
-	long castlingRights;
+	byte castlingRights;
 
 	// starting position constructor
 	public ePosition() {
@@ -39,6 +39,7 @@ public class ePosition {
 		for (int i = 0; i < 64; i++)
 			legalMoves.add(new ArrayList<>());
 		epSquare = -1;
+		castlingRights = (1 << 4) - 1;
 
 		byColorBB[WHITE.id] = RANK1BB | RANK2BB;
 		byColorBB[BLACK.id] = RANK7BB | RANK8BB;
@@ -76,11 +77,35 @@ public class ePosition {
 		ePosition p = new ePosition(this);
 		int from = move.getFrom();
 		int to = move.getTo();
+
 		boolean isDoublePawnPush = isDoublePawnPush(move);
-		System.out.println("isDoublePawnPush: " + isDoublePawnPush);
+
+		//utilize castling method to shorten expression
+		if (p.board[from].pieceType == ROOK) {
+			PieceType side = (squareBB(from) & FileABB) != 0 ? QUEEN : KING;
+			p.castlingRights &= ~castle(sideToMove, side);
+		} else if (p.board[from].pieceType == KING) {
+			p.castlingRights &= ~anyCastling(sideToMove);
+		}
 		p.move_piece(from, to, move.getMoveType());
+
+
+		if (move.getMoveType() == KINGSIDE_CASTLE.id || move.getMoveType() == QUEENSIDE_CASTLE.id) {
+			int rookFrom = p.sideToMove == WHITE ? (move.getMoveType() == KINGSIDE_CASTLE.id ? H1.id : A1.id) : (move.getMoveType() == KINGSIDE_CASTLE.id ? H8.id : A8.id);
+			int rookTo = p.sideToMove == WHITE ? (move.getMoveType() == KINGSIDE_CASTLE.id ? F1.id : D1.id) : (move.getMoveType() == KINGSIDE_CASTLE.id ? F8.id : D8.id);
+			if (p.board[rookFrom].pieceType != ROOK || p.board[rookTo] != NO_PIECE)
+				throw new IllegalStateException("castling is not legal");
+			//either of kingside and queenside movetypes could be passed
+			p.move_piece(rookFrom, rookTo, (int) KINGSIDE_CASTLE.id);
+		}
+
+
 		p.epSquare = -1;
-		if (isDoublePawnPush) p.epSquare = sideToMove == WHITE ? to - 8 : to + 8;
+		if (isDoublePawnPush) p.epSquare = sideToMove == WHITE ? to + 8 : to - 8;
+
+		p.checkers = attackersTo(getKingSquare(sideToMove.id ^ 1), pieces()) & pieces(sideToMove.id);
+
+		p.sideToMove = p.sideToMove.inverse();
 		p.generateLegalMoves();
 		return p;
 	}
@@ -109,6 +134,12 @@ public class ePosition {
 		System.out.println("SIDE_TO_MOVE\n" + sideToMove.name());
 		System.out.println("PINNED");
 		printBB(pinned(getKingSquare(sideToMove.id), sideToMove));
+		System.out.println("CASTLING RIGHTS");
+		printBB(castlingRights);
+	}
+
+	private byte castle(Color color, PieceType side) {
+		return (byte) (color == WHITE ? (side == KING ? 1 : 2) : (side == KING ? 4 : 8));
 	}
 
 	private boolean isDoublePawnPush(Move move) {
@@ -122,6 +153,7 @@ public class ePosition {
 		board = p.board;
 		checkers = p.checkers;
 		epSquare = p.epSquare;
+		castlingRights = p.castlingRights;
 		legalMoves = new ArrayList<>();
 		for (int i = 0; i < 64; i++)
 			legalMoves.add(new ArrayList<>());
@@ -138,6 +170,10 @@ public class ePosition {
 
 	private long pieces(int color) {
 		return byColorBB[color];
+	}
+
+	private long pieces(Color color) {
+		return byColorBB[color.id];
 	}
 
 	private long pieces(int color, PieceType pieceType) {
@@ -163,19 +199,56 @@ public class ePosition {
 
 		long pieces = pieces();
 		while (pieces != 0) {
-			int lsb = get_lsb(pieces);
-			long lsbBB = 1L << lsb;
-			List<Move> pseudoMoves = generatePseudoMoves(lsb, new Piece(board[lsb].pieceType, board[lsb].color),
+			int from = get_lsb(pieces);
+			long lsbBB = 1L << from;
+			List<Move> pseudoMoves = generatePseudoMoves(from, new Piece(board[from].pieceType, board[from].color),
 					pieces(us), pieces(us ^ 1), epSquare);
 			for (Move move : pseudoMoves) {
 				if (isLegal(move)) {
 					legalMoves.get(move.getFrom()).add(move);
 				}
 			}
+			if (board[from].pieceType == KING) {
+				if ((castling(sideToMove, KING) & castlingRights) != 0 && (attackersToLine(castlingLineBB(sideToMove, KING))
+						& pieces(sideToMove.inverse())) == 0 && (castlingLineBB(sideToMove, KING) & pieces()) == pieces(sideToMove, KING)) {
+					int to = sideToMove == WHITE ? G1.id : G8.id;
+					legalMoves.get(from).add(new Move(from, to, KINGSIDE_CASTLE));
+				}
+
+				if ((castling(sideToMove, QUEEN) & castlingRights) != 0 && (attackersToLine(castlingLineBB(sideToMove, QUEEN)) & pieces(sideToMove.inverse())) == 0
+						&& (castlingLineBB(sideToMove, QUEEN) & pieces()) == pieces(sideToMove, KING)) {
+					int to = sideToMove == WHITE ? C1.id : C8.id;
+					legalMoves.get(from).add(new Move(from, to, QUEENSIDE_CASTLE));
+				}
+			}
 
 			pieces ^= lsbBB;
 		}
 
+	}
+
+	static long castlingLineBB(Color us, PieceType side) {
+		return us == WHITE ? (side == KING ? lineBB(E1.id, G1.id) : lineBB(E1.id, B1.id)) : (side == KING ? lineBB(E8.id, G8.id) : lineBB(E8.id, B8.id));
+	}
+
+	//returns a bitboard of all pieces attacking a given line
+	private long attackersToLine(long lineBB) {
+		long attackers = 0;
+		while (lineBB != 0) {
+			int square = get_lsb(lineBB);
+			attackers |= attackersTo(square, pieces());
+			lineBB ^= squareBB(square);
+		}
+		return attackers;
+	}
+
+
+	private byte castling(Color us, PieceType side) {
+		return us == WHITE ? (side == KING ? WHITE_OO : WHITE_OOO) : (side == KING ? BLACK_OO : BLACK_OOO);
+	}
+
+	private byte anyCastling(Color us) {
+		return (byte) (us == WHITE ? 3 : 12);
 	}
 
 
@@ -186,7 +259,7 @@ public class ePosition {
 		if (moveType == EP_CAPTURE.id) {
 			if (board[to] != NO_PIECE) throw new IllegalStateException("en passant square is not empty");
 			if (sideToMove == WHITE && (squareBB(epSquare) & RANK6BB) == 0 || (sideToMove == BLACK && (squareBB(epSquare) & RANK3BB) == 0))
-				throw new IllegalStateException("en passant square can't be on ranks other than 2 or 7");
+				throw new IllegalStateException("en passant square can't be on ranks other than 3 or 6");
 			long capturedSquareBB = sideToMove == WHITE ? pawnPush(BLACK, epSquare) : pawnPush(WHITE, epSquare);
 			int capturedSquare = get_lsb(capturedSquareBB);
 
@@ -219,9 +292,7 @@ public class ePosition {
 		board[to] = board[from];
 		board[from] = NO_PIECE;
 
-		checkers = attackersTo(getKingSquare(us ^ 1), pieces()) & pieces(us);
 
-		sideToMove = sideToMove.inverse();
 	}
 
 
