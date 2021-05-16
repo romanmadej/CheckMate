@@ -5,8 +5,7 @@ import static com.oop.checkmate.Constants.Color.WHITE;
 import static com.oop.checkmate.Constants.PieceType.*;
 import static com.oop.checkmate.model.engine.BitboardUtils.*;
 import static com.oop.checkmate.model.engine.EngineConstants.*;
-import static com.oop.checkmate.model.engine.EngineConstants.MoveType.CAPTURE;
-import static com.oop.checkmate.model.engine.EngineConstants.MoveType.QUIET;
+import static com.oop.checkmate.model.engine.EngineConstants.MoveType.*;
 import static com.oop.checkmate.model.engine.EngineConstants.Square.A1;
 
 import java.util.ArrayList;
@@ -24,10 +23,10 @@ class Bitboards {
 	}
 
 	// have to be 0 initialized
-	static final long[][] pawnAttacks = new long[COLOR_N][SQUARE_N];
-	static final long[][] pawnPush = new long[COLOR_N][SQUARE_N];
-	static final long[][] pseudoAttacks = new long[PIECE_TYPE_N][SQUARE_N];
-	static final long[][] betweenBB = new long[SQUARE_N][SQUARE_N];
+	private static final long[][] pawnAttacks = new long[COLOR_N][SQUARE_N];
+	private static final long[][] pawnPush = new long[COLOR_N][SQUARE_N];
+	private static final long[][] pseudoAttacks = new long[PIECE_TYPE_N][SQUARE_N];
+	private static final long[][] betweenBB = new long[SQUARE_N][SQUARE_N];
 
 	static {
 		init();
@@ -63,21 +62,20 @@ class Bitboards {
 					Constants.PieceType.BISHOP, square, 0, 0);
 
 			// init betweenBB
-			int s1 = square;
 			for (int s2 = 0; s2 < 64; s2++) {
-				if ((slidingPseudoAttacks(BISHOP, s1, squareBB(s2), squareBB(s2)) & squareBB(s2)) != 0)
-					betweenBB[s1][s2] = slidingPseudoAttacks(BISHOP, s1, squareBB(s2), squareBB(s2))
-							& slidingPseudoAttacks(BISHOP, s2, squareBB(s1), squareBB(s1));
-				if ((slidingPseudoAttacks(ROOK, s1, squareBB(s2), squareBB(s2)) & squareBB(s2)) != 0)
-					betweenBB[s1][s2] = slidingPseudoAttacks(ROOK, s1, squareBB(s2), squareBB(s2))
-							& slidingPseudoAttacks(ROOK, s2, squareBB(s1), squareBB(s1));
+				if ((slidingPseudoAttacks(BISHOP, square, squareBB(s2), squareBB(s2)) & squareBB(s2)) != 0)
+					betweenBB[square][s2] = slidingPseudoAttacks(BISHOP, square, squareBB(s2), squareBB(s2))
+							& slidingPseudoAttacks(BISHOP, s2, squareBB(square), squareBB(square));
+				if ((slidingPseudoAttacks(ROOK, square, squareBB(s2), squareBB(s2)) & squareBB(s2)) != 0)
+					betweenBB[square][s2] = slidingPseudoAttacks(ROOK, square, squareBB(s2), squareBB(s2))
+							& slidingPseudoAttacks(ROOK, s2, squareBB(square), squareBB(square));
 			}
 		}
 	}
 
 	// works under assumption that QUIET and CAPTURE are only valid MoveTypes
-	public static long pseudoMovesBitboard(MoveType moveType, Constants.Color color, Constants.PieceType pieceType,
-			int squareId, long alliesBB, long opponentsBB) {
+	static long pseudoMovesBitboard(MoveType moveType, Constants.Color color, Constants.PieceType pieceType,
+									int squareId, long alliesBB, long opponentsBB) {
 		if (pieceType != ROOK && pieceType != BISHOP && pieceType != QUEEN) {
 
 			if (pieceType == PAWN)
@@ -92,14 +90,15 @@ class Bitboards {
 			return slidingPseudoAttacks(ROOK, squareId, alliesBB | opponentsBB, opponentsBB)
 					& (moveType == QUIET ? ~(alliesBB | opponentsBB) : opponentsBB)
 					| slidingPseudoAttacks(BISHOP, squareId, alliesBB | opponentsBB, opponentsBB)
-							& (moveType == QUIET ? ~(alliesBB | opponentsBB) : opponentsBB);
+					& (moveType == QUIET ? ~(alliesBB | opponentsBB) : opponentsBB);
 
 		return slidingPseudoAttacks(pieceType, squareId, alliesBB | opponentsBB, opponentsBB)
 				& (moveType == QUIET ? ~(alliesBB | opponentsBB) : opponentsBB);
 	}
 
-	public static List<Move> generatePseudoMoves(int squareId, Piece piece, long alliesBitboard,
-			long opponentsBitboard) {
+	//consider moving to ePosition and changing to non-static
+	static List<Move> generatePseudoMoves(int squareId, Piece piece, long alliesBitboard,
+										  long opponentsBitboard, int epSquare) {
 		List<Move> moves = new ArrayList<>();
 
 		// using naive scan for now
@@ -118,6 +117,10 @@ class Bitboards {
 			moves.add(new Move(squareId, lsb, CAPTURE.id));
 			movesBB &= ~(1L << lsb);
 		}
+		Constants.Color us = piece.getColor();
+		if (piece.getPieceType() == PAWN && epSquare != -1 && (pawnAttacks(us.inverse(), epSquare) & squareBB(squareId)) != 0)
+			moves.add(new Move(squareId, epSquare, EP_CAPTURE));
+
 		return moves;
 	}
 
@@ -145,4 +148,37 @@ class Bitboards {
 		return attacksBB;
 	}
 
+	static long pawnPush(Constants.Color side, int squareId) {
+		return pawnPush[side.id][squareId];
+	}
+
+	static long pawnAttacks(Constants.Color side, int squareId) {
+		return pawnAttacks[side.id][squareId];
+	}
+
+	static long pseudoAttacks(Constants.PieceType pieceType, int squareId) {
+		return pseudoAttacks[pieceType.id][squareId];
+	}
+
+	// returns bb of squares between a and b(both side exclusive)
+	static long betweenBB(long a, long b) {
+		if (more_than_one_bit(a) || more_than_one_bit(b))
+			throw new IllegalArgumentException("betweenBB parameter has more than one bit set");
+		return betweenBB[get_lsb(a)][get_lsb(b)];
+	}
+
+	static long betweenBB(int a, int b) {
+		return betweenBB[a][b];
+	}
+
+	//both side inclusive lineBB between a and b
+	static long lineBB(int a, int b) {
+		long aBB = 1L << a;
+		long bBB = 1L << b;
+		if ((pseudoAttacks[ROOK.id][a] & bBB) != 0)
+			return (pseudoAttacks[ROOK.id][a] & pseudoAttacks[ROOK.id][b]) | aBB | bBB;
+		if ((pseudoAttacks[BISHOP.id][a] & bBB) != 0)
+			return (pseudoAttacks[BISHOP.id][a] & pseudoAttacks[BISHOP.id][b]) | aBB | bBB;
+		throw new IllegalStateException("there is no line between 'a' and 'b'");
+	}
 }

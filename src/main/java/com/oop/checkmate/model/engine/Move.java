@@ -30,15 +30,22 @@ public class Move {
 	int getFrom() {
 		return (int) (moveBB & ((1L << 6) - 1));
 	}
+
 	int getTo() {
 		return (int) ((moveBB >>> 6) & ((1L << 6) - 1));
 	}
+
 	int getMoveType() {
 		return (int) ((moveBB >>> 12) & ((1L << 6) - 1));
 	}
 
 	public boolean isCapture() {
 		return (moveBB >>> 12) == 4;
+	}
+
+	public boolean isEpCapture() {
+		return (moveBB >>> 12) == 5;
+
 	}
 
 	public Position getFromPosition() {

@@ -12,6 +12,7 @@ class BitboardUtils {
 	private BitboardUtils() {
 	}
 
+
 	static final long lsb_magic = 0x022fdd63cc95386dL; // the 4061955.
 
 	static final int lsb_magictable[] = {0, 1, 2, 53, 3, 7, 54, 27, 4, 38, 41, 8, 34, 55, 48, 28, 62, 5, 39, 46, 44, 42,
@@ -28,26 +29,6 @@ class BitboardUtils {
 
 	static boolean more_than_one_bit(long BB) {
 		return (BB & ~get_lsbBB(BB)) != 0;
-	}
-
-	static long lineBB(int a, int b) {
-		long aBB = 1L << a;
-		long bBB = 1L << b;
-		if ((pseudoAttacks[ROOK.id][a] & bBB) != 0)
-			return (pseudoAttacks[ROOK.id][a] & pseudoAttacks[ROOK.id][b]) | aBB | bBB;
-		if ((pseudoAttacks[BISHOP.id][a] & bBB) != 0)
-			return (pseudoAttacks[BISHOP.id][a] & pseudoAttacks[BISHOP.id][b]) | aBB | bBB;
-		throw new IllegalStateException("there is no line between 'a' and 'b'");
-	}
-
-	// returns bb of squares between a and b(both side exclusive)
-	static long betweenBB(long a, long b) {
-		if (more_than_one_bit(a) || more_than_one_bit(b))
-			throw new IllegalArgumentException("betweenBB parameter has more than one bit set");
-		return betweenBB[get_lsb(a)][get_lsb(b)];
-	}
-	static long betweenBB(int a, int b) {
-		return betweenBB[a][b];
 	}
 
 	static int maxDist(int aSquare, int bSquare) {

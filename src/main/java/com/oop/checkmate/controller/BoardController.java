@@ -1,5 +1,6 @@
 package com.oop.checkmate.controller;
 
+import static com.oop.checkmate.Constants.Color.WHITE;
 import static com.oop.checkmate.Constants.SQUARE_SIZE;
 
 import java.util.List;
@@ -101,8 +102,6 @@ public class BoardController {
 
 				Optional<Move> move = legalMoves.stream().filter(m -> m.getToPosition().equals(position)).findFirst();
 				if (move.isPresent()) {
-					boardModel.makeMove(move.get());
-					ePos = ePos.make_move(move.get());
 					// ePos.print();
 
 					if (move.get().isCapture()) {
@@ -110,6 +109,16 @@ public class BoardController {
 						boardView.getChildren().remove(boardView.getPieceView(position));
 						boardView.getChildren().add(pieceView);
 					}
+					if (move.get().isEpCapture()) {
+						int capturedY = ePos.getSideToMove() == WHITE ? position.y + 1 : position.y - 1;
+						int capturedX = position.x;
+						boardView.getChildren().remove(pieceView);
+						boardView.getChildren().remove(boardView.getPieceView(new Position(capturedX, capturedY)));
+						boardView.getChildren().add(pieceView);
+					}
+
+					boardModel.makeMove(move.get());
+					ePos = ePos.make_move(move.get());
 					pieceView.setPosition(position);
 					boardView.highlightMove(move.get());
 				} else {
