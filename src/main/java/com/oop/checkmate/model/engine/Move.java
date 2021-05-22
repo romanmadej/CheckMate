@@ -2,6 +2,7 @@ package com.oop.checkmate.model.engine;
 
 import java.util.Objects;
 
+import com.oop.checkmate.Constants;
 import com.oop.checkmate.model.Position;
 
 import static com.oop.checkmate.model.engine.EngineConstants.Letters;
@@ -77,6 +78,39 @@ public class Move {
 	public Position getToPosition() {
 		int id = (int) ((moveBB >>> 6) & ((1L << 6) - 1));
 		return Position.fromSquareId(id);
+	}
+
+	boolean isPromotion() {
+		//all promotion types have 2^3 bit set
+		return ((moveBB >> 15) & 1) != 0;
+	}
+
+	Constants.PieceType getPromotionPieceType() {
+		switch ((int) ((moveBB >> 12) & 3)) {
+			case 0:
+				return Constants.PieceType.KNIGHT;
+			case 1:
+				return Constants.PieceType.BISHOP;
+			case 2:
+				return Constants.PieceType.ROOK;
+			case 3:
+				return Constants.PieceType.QUEEN;
+		}
+		throw new IllegalStateException("move is not promotion");
+	}
+
+	char getPromotionTypechar() {
+		switch ((int) ((moveBB >> 12) & 3)) {
+			case 0:
+				return 'n';
+			case 1:
+				return 'b';
+			case 2:
+				return 'r';
+			case 3:
+				return 'q';
+		}
+		throw new IllegalStateException("move is not promotion");
 	}
 
 	@Override
