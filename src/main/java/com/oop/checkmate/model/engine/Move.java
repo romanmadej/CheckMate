@@ -4,6 +4,8 @@ import java.util.Objects;
 
 import com.oop.checkmate.model.Position;
 
+import static com.oop.checkmate.model.engine.EngineConstants.Letters;
+
 public class Move {
 	/*
 	 * 32 bit words are used for representing a move bits: 0-5 from square 6-11
@@ -26,7 +28,19 @@ public class Move {
 		moveBB |= ((long) to << 6);
 		moveBB |= (moveType.id << 12);
 	}
+	EngineConstants.Square getFromSquare(){
+		String sName = Letters[getFrom()%8]+String.valueOf(getFrom()/8+1);
+		return EngineConstants.Square.valueOf(sName);
+	}
+	EngineConstants.Square getToSquare(){
+		String sName = Letters[getTo()%8]+String.valueOf(getTo()/8+1);
+		return EngineConstants.Square.valueOf(sName);
+	}
 
+
+	long getMoveBB() {
+		return moveBB;
+	}
 	int getFrom() {
 		return (int) (moveBB & ((1L << 6) - 1));
 	}
@@ -81,6 +95,6 @@ public class Move {
 
 	@Override
 	public String toString() {
-		return this.getFrom() + " -> " + this.getTo() + "   " + this.getMoveType();
+		return this.getFromSquare().name()+this.getToSquare().name() + "   " + this.getMoveType();
 	}
 }

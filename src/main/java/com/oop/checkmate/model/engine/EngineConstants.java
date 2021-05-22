@@ -33,6 +33,8 @@ public final class EngineConstants {
 
 	final static byte WHITE_OO = 1, WHITE_OOO = 2, BLACK_OO = 4, BLACK_OOO = 8;
 
+	final static char[] Letters = new char[]{'A','B','C','D','E','F','G','H'};
+
 	enum MoveType {
 		//move encoding based on https://www.chessprogramming.org/Encoding_Moves
 		QUIET(0), CAPTURE(1L << 2), EP_CAPTURE(5), KINGSIDE_CASTLE(2), QUEENSIDE_CASTLE(3);
