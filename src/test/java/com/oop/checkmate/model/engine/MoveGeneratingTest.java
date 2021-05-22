@@ -7,6 +7,7 @@ import static com.oop.checkmate.Constants.PieceType.QUEEN;
 import static com.oop.checkmate.model.engine.BitboardUtils.get_lsb;
 import static com.oop.checkmate.model.engine.BitboardUtils.squareBB;
 import static com.oop.checkmate.model.engine.Bitboards.pseudoMovesBitboard;
+import static com.oop.checkmate.model.engine.EngineConstants.MoveType.*;
 import static com.oop.checkmate.model.engine.EngineConstants.Square.*;
 import static com.oop.checkmate.model.engine.ePosition.castlingLineBB;
 
@@ -73,7 +74,42 @@ public class MoveGeneratingTest {
 		}
 	}
 
-	//position from https://www.chessprogramming.org/Perft_Results
+	@Test
+	public void isPromotionTest() {
+		TestCase.assertTrue(new Move(0, 0, KNIGHT_PROMO).isPromotion());
+		TestCase.assertTrue(new Move(0, 0, BISHOP_PROMO).isPromotion());
+		TestCase.assertTrue(new Move(0, 0, ROOK_PROMO).isPromotion());
+		TestCase.assertTrue(new Move(0, 0, QUEEN_PROMO).isPromotion());
+
+		TestCase.assertTrue(new Move(0, 0, KNIGHT_PROMO_CAPTURE).isPromotion());
+		TestCase.assertTrue(new Move(0, 0, BISHOP_PROMO_CAPTURE).isPromotion());
+		TestCase.assertTrue(new Move(0, 0, ROOK_PROMO_CAPTURE).isPromotion());
+		TestCase.assertTrue(new Move(0, 0, QUEEN_PROMO_CAPTURE).isPromotion());
+
+
+		TestCase.assertFalse(new Move(0, 0, QUIET).isPromotion());
+		TestCase.assertFalse(new Move(0, 0, KINGSIDE_CASTLE).isPromotion());
+		TestCase.assertFalse(new Move(0, 0, CAPTURE).isPromotion());
+		TestCase.assertFalse(new Move(0, 0, EP_CAPTURE).isPromotion());
+
+	}
+
+
+	@Test
+	public void startingPositionTest() {
+
+		TestCase.assertEquals(1, Perft.dfs(new ePosition(), 0, 0, null));
+		TestCase.assertEquals(20, Perft.dfs(new ePosition(), 0, 1, null));
+		TestCase.assertEquals(400, Perft.dfs(new ePosition(), 0, 2, null));
+		TestCase.assertEquals(8902, Perft.dfs(new ePosition(), 0, 3, null));
+		TestCase.assertEquals(197281, Perft.dfs(new ePosition(), 0, 4, null));
+		TestCase.assertEquals(4865609, Perft.dfs(new ePosition(), 0, 5, null));
+		//takes some time
+//		TestCase.assertEquals(119060324, Perft.dfs(new ePosition(), 0, 6, null));
+
+	}
+
+	//tested positions can be found on https://www.chessprogramming.org/Perft_Results
 	@Test
 	public void kiwiPete() {
 		long nodes1 = Perft.dfs(new ePosition("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq -"), 0, 1, null);
@@ -84,20 +120,89 @@ public class MoveGeneratingTest {
 
 		long nodes3 = Perft.dfs(new ePosition("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq -"), 0, 3, null);
 		TestCase.assertEquals(97862, nodes3);
+
+		long nodes4 = Perft.dfs(new ePosition("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq -"), 0, 4, null);
+		TestCase.assertEquals(4085603, nodes4);
+
+		long nodes5 = Perft.dfs(new ePosition("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq -"), 0, 5, null);
+		TestCase.assertEquals(193690690, nodes5);
+
 	}
 
 	@Test
-	public void perftTest() {
+	public void Position3() {
+		long nodes1 = Perft.dfs(new ePosition("8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - -"), 0, 1, null);
+		TestCase.assertEquals(14, nodes1);
 
-		TestCase.assertEquals(1, Perft.dfs(new ePosition(), 0, 0, null));
-		TestCase.assertEquals(20, Perft.dfs(new ePosition(), 0, 1, null));
-		TestCase.assertEquals(400, Perft.dfs(new ePosition(), 0, 2, null));
-		TestCase.assertEquals(8902, Perft.dfs(new ePosition(), 0, 3, null));
-		TestCase.assertEquals(197281, Perft.dfs(new ePosition(), 0, 4, null));
-		TestCase.assertEquals(4865609, Perft.dfs(new ePosition(), 0, 5, null));
-		TestCase.assertEquals(119060324, Perft.dfs(new ePosition(), 0, 6, null));
+		long nodes2 = Perft.dfs(new ePosition("8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - -"), 0, 2, null);
+		TestCase.assertEquals(191, nodes2);
+
+		long nodes3 = Perft.dfs(new ePosition("8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - -"), 0, 3, null);
+		TestCase.assertEquals(2812, nodes3);
+
+		long nodes4 = Perft.dfs(new ePosition("8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - -"), 0, 4, null);
+		TestCase.assertEquals(43238, nodes4);
+
+		long nodes5 = Perft.dfs(new ePosition("8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - -"), 0, 5, null);
+		TestCase.assertEquals(674624, nodes5);
 
 	}
 
-}
+	@Test
+	public void Position4() {
+		long nodes1 = Perft.dfs(new ePosition("r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1"), 0, 1, null);
+		TestCase.assertEquals(6, nodes1);
 
+		long nodes2 = Perft.dfs(new ePosition("r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1"), 0, 2, null);
+		TestCase.assertEquals(264, nodes2);
+
+		long nodes3 = Perft.dfs(new ePosition("r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1"), 0, 3, null);
+		TestCase.assertEquals(9467, nodes3);
+
+		long nodes4 = Perft.dfs(new ePosition("r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1"), 0, 4, null);
+		TestCase.assertEquals(422333, nodes4);
+
+		long nodes5 = Perft.dfs(new ePosition("r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1"), 0, 5, null);
+		TestCase.assertEquals(15833292, nodes5);
+
+	}
+
+	@Test
+	public void Position5() {
+		long nodes1 = Perft.dfs(new ePosition("rnbq1k1r/pp1Pbppp/2p5/8/2B5/8/PPP1NnPP/RNBQK2R w KQ - 1 8"), 0, 1, null);
+		TestCase.assertEquals(44, nodes1);
+
+		long nodes2 = Perft.dfs(new ePosition("rnbq1k1r/pp1Pbppp/2p5/8/2B5/8/PPP1NnPP/RNBQK2R w KQ - 1 8"), 0, 2, null);
+		TestCase.assertEquals(1486, nodes2);
+
+		long nodes3 = Perft.dfs(new ePosition("rnbq1k1r/pp1Pbppp/2p5/8/2B5/8/PPP1NnPP/RNBQK2R w KQ - 1 8"), 0, 3, null);
+		TestCase.assertEquals(62379, nodes3);
+
+		long nodes4 = Perft.dfs(new ePosition("rnbq1k1r/pp1Pbppp/2p5/8/2B5/8/PPP1NnPP/RNBQK2R w KQ - 1 8"), 0, 4, null);
+		TestCase.assertEquals(2103487, nodes4);
+
+		long nodes5 = Perft.dfs(new ePosition("rnbq1k1r/pp1Pbppp/2p5/8/2B5/8/PPP1NnPP/RNBQK2R w KQ - 1 8"), 0, 5, null);
+		TestCase.assertEquals(89941194, nodes5);
+
+
+	}
+
+	@Test
+	public void Position6() {
+		long nodes1 = Perft.dfs(new ePosition("r4rk1/1pp1qppp/p1np1n2/2b1p1B1/2B1P1b1/P1NP1N2/1PP1QPPP/R4RK1 w - - 0 10"), 0, 1, null);
+		TestCase.assertEquals(46, nodes1);
+
+		long nodes2 = Perft.dfs(new ePosition("r4rk1/1pp1qppp/p1np1n2/2b1p1B1/2B1P1b1/P1NP1N2/1PP1QPPP/R4RK1 w - - 0 10"), 0, 2, null);
+		TestCase.assertEquals(2079, nodes2);
+
+		long nodes3 = Perft.dfs(new ePosition("r4rk1/1pp1qppp/p1np1n2/2b1p1B1/2B1P1b1/P1NP1N2/1PP1QPPP/R4RK1 w - - 0 10"), 0, 3, null);
+		TestCase.assertEquals(89890, nodes3);
+
+		long nodes4 = Perft.dfs(new ePosition("r4rk1/1pp1qppp/p1np1n2/2b1p1B1/2B1P1b1/P1NP1N2/1PP1QPPP/R4RK1 w - - 0 10"), 0, 4, null);
+		TestCase.assertEquals(3894594, nodes4);
+
+		long nodes5 = Perft.dfs(new ePosition("r4rk1/1pp1qppp/p1np1n2/2b1p1B1/2B1P1b1/P1NP1N2/1PP1QPPP/R4RK1 w - - 0 10"), 0, 5, null);
+		TestCase.assertEquals(164075551, nodes5);
+	}
+
+}

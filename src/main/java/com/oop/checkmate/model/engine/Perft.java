@@ -13,7 +13,7 @@ class MoveHistory {
     }
 
     private static String traverse(MoveHistory mh) {
-        String s = mh.move.getFromSquare().name().toLowerCase() + mh.move.getToSquare().name().toLowerCase();
+        String s = mh.move.getFromSquare().name().toLowerCase() + mh.move.getToSquare().name().toLowerCase() + (mh.move.isPromotion() ? mh.move.getPromotionTypechar() : "");
         if (mh.prev == null) return s;
         return traverse(mh.prev) + "  " + s;
 
