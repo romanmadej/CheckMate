@@ -103,7 +103,7 @@ public class BoardController {
 				Optional<Move> move = legalMoves.stream().filter(m -> m.getToPosition().equals(position)).findFirst();
 				if (move.isPresent()) {
 
-					if (move.get().isCapture()) {
+					if (move.get().isRegularCapture()) {
 						boardView.getChildren().remove(pieceView);
 						boardView.getChildren().remove(boardView.getPieceView(position));
 						boardView.getChildren().add(pieceView);

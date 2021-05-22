@@ -85,7 +85,7 @@ public class ePosition {
 		while (Character.isWhitespace(fenString.charAt(i))) i++;
 
 		castlingRights = 0;
-		while (!Character.isWhitespace(fenString.charAt(i))) {
+		while (!Character.isWhitespace(fenString.charAt(i)) && fenString.charAt(i) != '-') {
 			char c = fenString.charAt(i);
 			switch (c) {
 				case 'k':
@@ -213,6 +213,12 @@ public class ePosition {
 			return (attackersTo(to, pieces() ^ fromBB) & pieces(sideToMove.id ^ 1)) == 0;
 		}
 		if (isDoublePawnPush(move) && ((betweenBB(from, to) | toBB) & pieces()) != 0) return false;
+		if (move.isEpCapture()) {
+			int captured = sideToMove == WHITE ? to - 8 : to + 8;
+			long fromToBB = fromBB | toBB;
+			if ((attackersTo(getKingSquare(sideToMove.id), pieces() ^ (squareBB(captured) | fromToBB)) & (pieces(sideToMove.id ^ 1) ^ squareBB(captured))) != 0)
+				return false;
+		}
 
 		int kingSquare = getKingSquare(sideToMove.id);
 		return ((pinned(kingSquare, sideToMove) & fromBB) == 0) || (lineBB(kingSquare, from) & toBB) != 0;
@@ -296,7 +302,7 @@ public class ePosition {
 		boolean isDoublePawnPush = isDoublePawnPush(move);
 
 		//utilize castling method to shorten expression
-		if (p.board[from].pieceType == ROOK) {
+		if (p.board[from].pieceType == ROOK && (squareBB(from) & (sideToMove == WHITE ? whiteCornersBB : blackCornersBB)) != 0) {
 			PieceType side = (squareBB(from) & FileABB) != 0 ? QUEEN : KING;
 			p.castlingRights &= ~castle(sideToMove, side);
 		} else if (p.board[from].pieceType == KING) {
@@ -317,6 +323,23 @@ public class ePosition {
 
 		p.epSquare = -1;
 		if (isDoublePawnPush) p.epSquare = sideToMove == WHITE ? to - 8 : to + 8;
+		if (move.isCapture() && board[to].pieceType == ROOK) {
+			switch (to) {
+				case 0:
+					p.castlingRights &= ~WHITE_OOO;
+					break;
+				case 7:
+					p.castlingRights &= ~WHITE_OO;
+					break;
+				case 56:
+					p.castlingRights &= ~BLACK_OOO;
+					break;
+				case 63:
+					p.castlingRights &= ~BLACK_OO;
+					break;
+			}
+		}
+
 
 		p.checkers = p.attackersTo(p.getKingSquare(sideToMove.id ^ 1), p.pieces()) & p.pieces(sideToMove.id);
 

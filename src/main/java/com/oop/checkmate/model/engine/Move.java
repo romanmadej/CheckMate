@@ -27,7 +27,7 @@ public class Move {
 	public Move(int from, int to, EngineConstants.MoveType moveType) {
 		moveBB = from;
 		moveBB |= ((long) to << 6);
-		moveBB |= (moveType.id << 12);
+		moveBB |= ((long) moveType.id << 12);
 	}
 	EngineConstants.Square getFromSquare(){
 		String sName = Letters[getFrom()%8]+String.valueOf(getFrom()/8+1);
@@ -55,6 +55,10 @@ public class Move {
 	}
 
 	public boolean isCapture() {
+		return ((moveBB >>> 12) & 4) != 0;
+	}
+
+	public boolean isRegularCapture() {
 		return (moveBB >>> 12) == 4;
 	}
 

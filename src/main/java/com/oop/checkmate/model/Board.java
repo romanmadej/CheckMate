@@ -25,12 +25,10 @@ public class Board {
 				continue;
 			}
 
+			if (i >= 64) break;
 			chessBoard[i / 8][i % 8] = Piece.fromFenChar(c);
 
-			if (++i >= 64) {
-				// TODO parse state
-				break;
-			}
+			i++;
 		}
 	}
 

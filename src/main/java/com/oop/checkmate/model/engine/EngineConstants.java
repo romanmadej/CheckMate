@@ -5,6 +5,7 @@ import static com.oop.checkmate.Constants.Color.BLACK;
 import static com.oop.checkmate.Constants.Color.WHITE;
 import static com.oop.checkmate.Constants.PieceType.*;
 import static com.oop.checkmate.model.engine.BitboardUtils.squareBB;
+import static com.oop.checkmate.model.engine.EngineConstants.Square.*;
 
 import com.oop.checkmate.Constants;
 import com.oop.checkmate.model.Piece;
@@ -33,15 +34,19 @@ public final class EngineConstants {
 
 	final static byte WHITE_OO = 1, WHITE_OOO = 2, BLACK_OO = 4, BLACK_OOO = 8;
 
-	final static char[] Letters = new char[]{'A','B','C','D','E','F','G','H'};
+	final static char[] Letters = new char[]{'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'};
+
+	final static long whiteCornersBB = squareBB(A1.id) | squareBB(H1.id),
+			blackCornersBB = squareBB(A8.id) | squareBB(H8.id);
 
 	enum MoveType {
 		//move encoding based on https://www.chessprogramming.org/Encoding_Moves
-		QUIET(0), CAPTURE(1L << 2), EP_CAPTURE(5), KINGSIDE_CASTLE(2), QUEENSIDE_CASTLE(3);
+		QUIET(0), KINGSIDE_CASTLE(2), QUEENSIDE_CASTLE(3), CAPTURE(4), EP_CAPTURE(5),
+		KNIGHT_PROMO(8), BISHOP_PROMO(9), ROOK_PROMO(10), QUEEN_PROMO(11), KNIGHT_PROMO_CAPTURE(12), BISHOP_PROMO_CAPTURE(13), ROOK_PROMO_CAPTURE(14), QUEEN_PROMO_CAPTURE(15);
 
-		public final long id;
+		public final int id;
 
-		MoveType(long id) {
+		MoveType(int id) {
 			this.id = id;
 		}
 	}
@@ -68,22 +73,53 @@ public final class EngineConstants {
 				BISHOP), B_ROOK(BLACK, ROOK), B_QUEEN(BLACK, QUEEN), B_KING(BLACK, KING);
 		static ePiece get_ePiece(char typeChar) {
 			switch (typeChar) {
-				case 'p': return B_PAWN;
-				case 'n': return B_KNIGHT;
-				case 'b':return B_BISHOP;
-				case 'r': return B_ROOK;
-				case 'q': return B_QUEEN;
-				case 'k': return B_KING;
-				case 'P': return W_PAWN;
-				case 'N': return W_KNIGHT;
-				case 'B':return W_BISHOP;
-				case 'R': return W_ROOK;
-				case 'Q': return W_QUEEN;
-				case 'K': return W_KING;
-				default: throw new IllegalArgumentException(String.valueOf(typeChar));
+				case 'p':
+					return B_PAWN;
+				case 'n':
+					return B_KNIGHT;
+				case 'b':
+					return B_BISHOP;
+				case 'r':
+					return B_ROOK;
+				case 'q':
+					return B_QUEEN;
+				case 'k':
+					return B_KING;
+				case 'P':
+					return W_PAWN;
+				case 'N':
+					return W_KNIGHT;
+				case 'B':
+					return W_BISHOP;
+				case 'R':
+					return W_ROOK;
+				case 'Q':
+					return W_QUEEN;
+				case 'K':
+					return W_KING;
+				default:
+					throw new IllegalArgumentException(String.valueOf(typeChar));
 			}
-
 		}
+
+		static ePiece get_ePiece(Color color, Constants.PieceType pieceType) {
+			switch (pieceType) {
+				case KNIGHT:
+					return color == WHITE ? W_KNIGHT : B_KNIGHT;
+				case PAWN:
+					return color == WHITE ? W_PAWN : B_PAWN;
+				case BISHOP:
+					return color == WHITE ? W_BISHOP : B_BISHOP;
+				case ROOK:
+					return color == WHITE ? W_ROOK : B_ROOK;
+				case KING:
+					return color == WHITE ? W_KING : B_KING;
+				case QUEEN:
+					return color == WHITE ? W_QUEEN : B_QUEEN;
+			}
+			throw new IllegalStateException("couldn't find ePiece");
+		}
+
 		Color color;
 		Constants.PieceType pieceType;
 
