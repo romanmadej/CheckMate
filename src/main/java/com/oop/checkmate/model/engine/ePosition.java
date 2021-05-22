@@ -11,8 +11,7 @@ import static com.oop.checkmate.model.engine.EngineConstants.MoveType.*;
 import static com.oop.checkmate.model.engine.EngineConstants.Square.*;
 import static com.oop.checkmate.model.engine.EngineConstants.ePiece.*;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 import com.oop.checkmate.model.Piece;
 
@@ -21,49 +20,106 @@ public class ePosition {
 	long[] byTypeBB;
 	long[] byColorBB;
 	ePiece[] board;
+	int epSquare;
+	byte castlingRights;
+
 	ePosition prev;
 	long checkers; // opposing color pieces giving check
 	List<List<Move>> legalMoves;
 	static final List<Move> EMPTY_LIST = new ArrayList<>();
-	int epSquare;
-	//
-	byte castlingRights;
 
 	// starting position constructor
 	public ePosition() {
-		byTypeBB = new long[PIECE_TYPE_N + 1];
+		this("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+	}
+
+	private ePosition(ePosition p) {
+		sideToMove = p.sideToMove;
+
 		byColorBB = new long[COLOR_N];
-		checkers = 0;
-		sideToMove = WHITE;
+		byColorBB[WHITE.id] = p.byColorBB[WHITE.id];
+		byColorBB[BLACK.id] = p.byColorBB[BLACK.id];
+
+		byTypeBB = new long[PIECE_TYPE_N + 1];
+		System.arraycopy(p.byTypeBB, 0, byTypeBB, 0, PIECE_TYPE_N + 1);
+
+		board = new ePiece[SQUARE_N];
+		System.arraycopy(p.board, 0, board, 0, SQUARE_N);
+
+		checkers = p.checkers;
+		epSquare = p.epSquare;
+		castlingRights = p.castlingRights;
 		legalMoves = new ArrayList<>();
 		for (int i = 0; i < 64; i++)
 			legalMoves.add(new ArrayList<>());
-		epSquare = -1;
-		castlingRights = (1 << 4) - 1;
+		prev = p;
+	}
 
-		byColorBB[WHITE.id] = RANK1BB | RANK2BB;
-		byColorBB[BLACK.id] = RANK7BB | RANK8BB;
+	public ePosition(String fenString) {
+		byTypeBB = new long[PIECE_TYPE_N + 1];
+		byColorBB = new long[COLOR_N];
+		board = new ePiece[64];
+		Arrays.fill(board, NO_PIECE);
+//		for(int i=0;i<64;i++) board[i]=NO_PIECE;
 
+		fenString = fenString.trim();
+		int i = 0, squareId = 0, n = fenString.length();
 
-		byTypeBB[PAWN.id] = RANK2BB | RANK7BB;
-		byTypeBB[ROOK.id] = A1.BB | H1.BB | A8.BB | H8.BB;
-		byTypeBB[KNIGHT.id] = B1.BB | G1.BB | B8.BB | G8.BB;
-		byTypeBB[BISHOP.id] = C1.BB | F1.BB | C8.BB | F8.BB;
-		byTypeBB[QUEEN.id] = D1.BB | D8.BB;
-		byTypeBB[KING.id] = E1.BB | E8.BB;
+		for (; i < n && squareId < 64; i++) {
+			int sq = 8 * (7 - squareId / 8) + squareId % 8;
+			char c = fenString.charAt(i);
+			if (c == '/') continue;
+			if (Character.isDigit(c)) {
+				squareId += Character.digit(c, 10);
+				continue;
+			}
+			ePiece pc = get_ePiece(c);
+			board[sq] = pc;
+			byTypeBB[pc.pieceType.id] ^= squareBB(sq);
+			byTypeBB[ALL_PIECES] ^= squareBB(sq);
+			byColorBB[pc.color.id] ^= squareBB(sq);
+			squareId++;
+		}
+		while (Character.isWhitespace(fenString.charAt(i))) i++;
+		sideToMove = fenString.charAt(i++) == 'w' ? WHITE : BLACK;
+		while (Character.isWhitespace(fenString.charAt(i))) i++;
 
-		byTypeBB[ALL_PIECES] = byColorBB[WHITE.id] | byColorBB[BLACK.id];
+		castlingRights = 0;
+		while (!Character.isWhitespace(fenString.charAt(i))) {
+			char c = fenString.charAt(i);
+			switch (c) {
+				case 'k':
+					castlingRights |= BLACK_OO;
+					break;
+				case 'q':
+					castlingRights |= BLACK_OOO;
+					break;
+				case 'K':
+					castlingRights |= WHITE_OO;
+					break;
+				case 'Q':
+					castlingRights |= WHITE_OOO;
+					break;
+				default:
+					throw new IllegalStateException("Illegal castling rights character");
+			}
+			i++;
+		}
 
-		board = new ePiece[]{W_ROOK, W_KNIGHT, W_BISHOP, W_QUEEN, W_KING, W_BISHOP, W_KNIGHT, W_ROOK, W_PAWN, W_PAWN,
-				W_PAWN, W_PAWN, W_PAWN, W_PAWN, W_PAWN, W_PAWN, NO_PIECE, NO_PIECE, NO_PIECE, NO_PIECE, NO_PIECE,
-				NO_PIECE, NO_PIECE, NO_PIECE, NO_PIECE, NO_PIECE, NO_PIECE, NO_PIECE, NO_PIECE, NO_PIECE, NO_PIECE,
-				NO_PIECE, NO_PIECE, NO_PIECE, NO_PIECE, NO_PIECE, NO_PIECE, NO_PIECE, NO_PIECE, NO_PIECE, NO_PIECE,
-				NO_PIECE, NO_PIECE, NO_PIECE, NO_PIECE, NO_PIECE, NO_PIECE, NO_PIECE, B_PAWN, B_PAWN, B_PAWN, B_PAWN,
-				B_PAWN, B_PAWN, B_PAWN, B_PAWN, B_ROOK, B_KNIGHT, B_BISHOP, B_QUEEN, B_KING, B_BISHOP, B_KNIGHT,
-				B_ROOK};
+		while (Character.isWhitespace(fenString.charAt(i))) i++;
+		if (fenString.charAt(i) != '-') {
+			String sName = fenString.substring(i, i + 2).toUpperCase(Locale.ROOT);
+			Square s = Square.valueOf(sName);
+			epSquare = s.id;
+		} else epSquare = -1;
+		//halfmove and fullmove clocks ignored for now
 
-		this.prev = null;
+		checkers = attackersTo(getKingSquare(sideToMove.id), pieces()) & pieces(sideToMove.id ^ 1);
+		legalMoves = new ArrayList<>();
+		for (int j = 0; j < 64; j++)
+			legalMoves.add(new ArrayList<>());
 		generateLegalMoves();
+		prev = null;
 	}
 
 	public List<Move> getLegalMoves(int square) {
@@ -71,6 +127,162 @@ public class ePosition {
 		if (board[square].color != sideToMove)
 			return EMPTY_LIST;
 		return legalMoves.get(square);
+	}
+
+
+	public Color getSideToMove() {
+		return sideToMove;
+	}
+
+	public void print() {
+		for (PieceType pt : PieceType.values()) {
+			System.out.println(pt.name());
+			printBB(byTypeBB[pt.id]);
+		}
+		for (Color c : Color.values()) {
+			System.out.println(c.name());
+			printBB(byColorBB[c.id]);
+		}
+		for (int i = 8; i > 0; i--) {
+			for (int j = 8; j > 0; j--) {
+				System.out.print(board[8 * i - j].name().concat("         ").substring(0, 10) + "  ");
+			}
+			System.out.println();
+		}
+		System.out.println("CHECKERS");
+		printBB(checkers);
+		System.out.println("SIDE_TO_MOVE\n" + sideToMove.name());
+		System.out.println("PINNED");
+		printBB(pinned(getKingSquare(sideToMove.id), sideToMove));
+		System.out.println("CASTLING RIGHTS");
+		printBB(castlingRights);
+		System.out.println("LEGAL MOVES");
+		for (List<Move> moves : legalMoves) {
+			for (Move move : moves)
+				System.out.println(move);
+		}
+	}
+
+	private void generateLegalMoves() {
+
+		int us = sideToMove.id;
+
+		if (checkers != 0) {
+			generateEvasions();
+			return;
+		}
+
+		long pieces = pieces(us);
+		while (pieces != 0) {
+			int from = get_lsb(pieces);
+			long lsbBB = 1L << from;
+			List<Move> pseudoMoves = generatePseudoMoves(from, new Piece(board[from].pieceType, board[from].color),
+					pieces(us), pieces(us ^ 1), epSquare);
+			for (Move move : pseudoMoves) {
+				if (isLegal(move)) {
+					legalMoves.get(move.getFrom()).add(move);
+				}
+			}
+			if (board[from].pieceType == KING) {
+				if ((castling(sideToMove, KING) & castlingRights) != 0 && (attackersToLine(kingPathBB(sideToMove, KING))
+						& pieces(sideToMove.inverse())) == 0 && (castlingLineBB(sideToMove, KING) & pieces()) == pieces(sideToMove, KING)) {
+					int to = sideToMove == WHITE ? G1.id : G8.id;
+					legalMoves.get(from).add(new Move(from, to, KINGSIDE_CASTLE));
+				}
+
+				if ((castling(sideToMove, QUEEN) & castlingRights) != 0 && (attackersToLine(kingPathBB(sideToMove, QUEEN)) & pieces(sideToMove.inverse())) == 0
+						&& (castlingLineBB(sideToMove, QUEEN) & pieces()) == pieces(sideToMove, KING)) {
+					int to = sideToMove == WHITE ? C1.id : C8.id;
+					legalMoves.get(from).add(new Move(from, to, QUEENSIDE_CASTLE));
+				}
+			}
+
+			pieces ^= lsbBB;
+		}
+
+	}
+
+	private boolean isLegal(Move move) {
+		int from = move.getFrom();
+		int to = move.getTo();
+		long fromBB = 1L << from;
+		long toBB = 1L << to;
+
+		if (fromBB == pieces(sideToMove.id, KING)) {
+			return (attackersTo(to, pieces() ^ fromBB) & pieces(sideToMove.id ^ 1)) == 0;
+		}
+		if (isDoublePawnPush(move) && ((betweenBB(from, to) | toBB) & pieces()) != 0) return false;
+
+		int kingSquare = getKingSquare(sideToMove.id);
+		return ((pinned(kingSquare, sideToMove) & fromBB) == 0) || (lineBB(kingSquare, from) & toBB) != 0;
+	}
+
+	public void generateEvasions() {
+		int us = sideToMove.id;
+		if (checkers == 0)
+			throw new IllegalStateException("Evasions can be generated only when sideToMove's king is in check");
+
+		int kingSq = getKingSquare(us);
+		long quietsKing = pseudoMovesBitboard(QUIET, sideToMove, KING, kingSq, pieces(us), pieces(us ^ 1));
+		long capturesKing = pseudoMovesBitboard(CAPTURE, sideToMove, KING, kingSq, pieces(us), pieces(us ^ 1));
+		BBtoLegalMoves(kingSq, quietsKing, QUIET);
+		BBtoLegalMoves(kingSq, capturesKing, CAPTURE);
+		// only king can move out of check
+		if (more_than_one_bit(checkers)) {
+			return;
+		}
+
+		long checkerBB = get_lsbBB(checkers);
+		int checkerSquare = get_lsb(checkers);
+		long kingSqBB = 1L << kingSq;
+		PieceType checkerType = board[checkerSquare].pieceType;
+		long betweenBB = (checkerType == QUEEN || checkerType == ROOK || checkerType == BISHOP)
+				? betweenBB(kingSqBB, checkerBB)
+				: 0;
+
+		// check blocking with other pieces and checker piece captures
+		for (PieceType pieceType : PieceType.values()) {
+			long piecesBB = pieces(us, pieceType);
+			while (piecesBB != 0) {
+				int lsb = get_lsb(piecesBB);
+				long from = 1L << lsb;
+
+				//king moves already generated
+				if (board[lsb].pieceType == KING) {
+					piecesBB ^= from;
+					continue;
+				}
+				long movesBB = pseudoMovesBitboard(QUIET, sideToMove, pieceType, lsb, pieces(us), pieces(us ^ 1));
+				movesBB &= betweenBB;
+				while (movesBB != 0) {
+					int to = get_lsb(movesBB);
+					Move move = new Move(lsb, to, QUIET);
+					if (isLegal(move))
+						legalMoves.get(move.getFrom()).add(move);
+					movesBB ^= 1L << to;
+				}
+
+				movesBB = pseudoMovesBitboard(CAPTURE, sideToMove, pieceType, lsb, pieces(us), pieces(us ^ 1));
+				while (movesBB != 0) {
+					int to = get_lsb(movesBB);
+					if (((1L << to) & checkerBB) != 0) {
+						Move move = new Move(lsb, to, CAPTURE);
+						if (isLegal(move)) {
+							legalMoves.get(move.getFrom()).add(move);
+						}
+					}
+					movesBB ^= 1L << to;
+				}
+
+				if (epSquare != -1 && board[lsb].pieceType == PAWN && (pawnAttacks(sideToMove.inverse(), epSquare) & from) != 0 &&
+						(((squareBB(epSquare) & betweenBB) != 0) || checkerBB == pawnPush(sideToMove.inverse(), epSquare))) {
+					Move move = new Move(lsb, epSquare, EP_CAPTURE);
+					if (isLegal(move)) legalMoves.get(move.getFrom()).add(move);
+				}
+
+				piecesBB ^= from;
+			}
+		}
 	}
 
 	public ePosition make_move(Move move) {
@@ -101,154 +313,13 @@ public class ePosition {
 
 
 		p.epSquare = -1;
-		if (isDoublePawnPush) p.epSquare = sideToMove == WHITE ? to + 8 : to - 8;
+		if (isDoublePawnPush) p.epSquare = sideToMove == WHITE ? to - 8 : to + 8;
 
-		p.checkers = attackersTo(getKingSquare(sideToMove.id ^ 1), pieces()) & pieces(sideToMove.id);
+		p.checkers = p.attackersTo(p.getKingSquare(sideToMove.id ^ 1), p.pieces()) & p.pieces(sideToMove.id);
 
 		p.sideToMove = p.sideToMove.inverse();
 		p.generateLegalMoves();
 		return p;
-	}
-
-	public Color getSideToMove() {
-		return sideToMove;
-	}
-
-	public void print() {
-		for (PieceType pt : PieceType.values()) {
-			System.out.println(pt.name());
-			printBB(byTypeBB[pt.id]);
-		}
-		for (Color c : Color.values()) {
-			System.out.println(c.name());
-			printBB(byColorBB[c.id]);
-		}
-		for (int i = 8; i > 0; i--) {
-			for (int j = 8; j > 0; j--) {
-				System.out.print(board[8 * i - j].name().concat("         ").substring(0, 10) + "  ");
-			}
-			System.out.println();
-		}
-		System.out.println("CHECKERS");
-		printBB(checkers);
-		System.out.println("SIDE_TO_MOVE\n" + sideToMove.name());
-		System.out.println("PINNED");
-		printBB(pinned(getKingSquare(sideToMove.id), sideToMove));
-		System.out.println("CASTLING RIGHTS");
-		printBB(castlingRights);
-	}
-
-	private byte castle(Color color, PieceType side) {
-		return (byte) (color == WHITE ? (side == KING ? 1 : 2) : (side == KING ? 4 : 8));
-	}
-
-	private boolean isDoublePawnPush(Move move) {
-		return board[move.getFrom()].pieceType == PAWN && maxDist(move.getFrom(), move.getTo()) == 2;
-	}
-
-	private ePosition(ePosition p) {
-		sideToMove = p.sideToMove;
-		byTypeBB = p.byTypeBB;
-		byColorBB = p.byColorBB;
-		board = p.board;
-		checkers = p.checkers;
-		epSquare = p.epSquare;
-		castlingRights = p.castlingRights;
-		legalMoves = new ArrayList<>();
-		for (int i = 0; i < 64; i++)
-			legalMoves.add(new ArrayList<>());
-		prev = p;
-	}
-
-	private long pieces(PieceType pieceType) {
-		return byTypeBB[pieceType.id];
-	}
-
-	private long pieces() {
-		return byColorBB[WHITE.id] | byColorBB[BLACK.id];
-	}
-
-	private long pieces(int color) {
-		return byColorBB[color];
-	}
-
-	private long pieces(Color color) {
-		return byColorBB[color.id];
-	}
-
-	private long pieces(int color, PieceType pieceType) {
-		return byColorBB[color] & byTypeBB[pieceType.id];
-	}
-
-	private long pieces(Color color, PieceType pieceType) {
-		return byColorBB[color.id] & byTypeBB[pieceType.id];
-	}
-
-	private int getKingSquare(int color) {
-		return get_lsb(pieces(color, KING));
-	}
-
-	private void generateLegalMoves() {
-
-		int us = sideToMove.id;
-
-		if (checkers != 0) {
-			generateEvasions();
-			return;
-		}
-
-		long pieces = pieces();
-		while (pieces != 0) {
-			int from = get_lsb(pieces);
-			long lsbBB = 1L << from;
-			List<Move> pseudoMoves = generatePseudoMoves(from, new Piece(board[from].pieceType, board[from].color),
-					pieces(us), pieces(us ^ 1), epSquare);
-			for (Move move : pseudoMoves) {
-				if (isLegal(move)) {
-					legalMoves.get(move.getFrom()).add(move);
-				}
-			}
-			if (board[from].pieceType == KING) {
-				if ((castling(sideToMove, KING) & castlingRights) != 0 && (attackersToLine(castlingLineBB(sideToMove, KING))
-						& pieces(sideToMove.inverse())) == 0 && (castlingLineBB(sideToMove, KING) & pieces()) == pieces(sideToMove, KING)) {
-					int to = sideToMove == WHITE ? G1.id : G8.id;
-					legalMoves.get(from).add(new Move(from, to, KINGSIDE_CASTLE));
-				}
-
-				if ((castling(sideToMove, QUEEN) & castlingRights) != 0 && (attackersToLine(castlingLineBB(sideToMove, QUEEN)) & pieces(sideToMove.inverse())) == 0
-						&& (castlingLineBB(sideToMove, QUEEN) & pieces()) == pieces(sideToMove, KING)) {
-					int to = sideToMove == WHITE ? C1.id : C8.id;
-					legalMoves.get(from).add(new Move(from, to, QUEENSIDE_CASTLE));
-				}
-			}
-
-			pieces ^= lsbBB;
-		}
-
-	}
-
-	static long castlingLineBB(Color us, PieceType side) {
-		return us == WHITE ? (side == KING ? lineBB(E1.id, G1.id) : lineBB(E1.id, B1.id)) : (side == KING ? lineBB(E8.id, G8.id) : lineBB(E8.id, B8.id));
-	}
-
-	//returns a bitboard of all pieces attacking a given line
-	private long attackersToLine(long lineBB) {
-		long attackers = 0;
-		while (lineBB != 0) {
-			int square = get_lsb(lineBB);
-			attackers |= attackersTo(square, pieces());
-			lineBB ^= squareBB(square);
-		}
-		return attackers;
-	}
-
-
-	private byte castling(Color us, PieceType side) {
-		return us == WHITE ? (side == KING ? WHITE_OO : WHITE_OOO) : (side == KING ? BLACK_OO : BLACK_OOO);
-	}
-
-	private byte anyCastling(Color us) {
-		return (byte) (us == WHITE ? 3 : 12);
 	}
 
 
@@ -295,6 +366,73 @@ public class ePosition {
 
 	}
 
+	private byte castle(Color color, PieceType side) {
+		return (byte) (color == WHITE ? (side == KING ? 1 : 2) : (side == KING ? 4 : 8));
+	}
+
+	private boolean isDoublePawnPush(Move move) {
+		return board[move.getFrom()].pieceType == PAWN && maxDist(move.getFrom(), move.getTo()) == 2;
+	}
+
+
+	private long pieces(PieceType pieceType) {
+		return byTypeBB[pieceType.id];
+	}
+
+	private long pieces() {
+		return byColorBB[WHITE.id] | byColorBB[BLACK.id];
+	}
+
+	private long pieces(int color) {
+		return byColorBB[color];
+	}
+
+	private long pieces(Color color) {
+		return byColorBB[color.id];
+	}
+
+	private long pieces(int color, PieceType pieceType) {
+		return byColorBB[color] & byTypeBB[pieceType.id];
+	}
+
+	private long pieces(Color color, PieceType pieceType) {
+		return byColorBB[color.id] & byTypeBB[pieceType.id];
+	}
+
+	private int getKingSquare(int color) {
+		return get_lsb(pieces(color, KING));
+	}
+
+
+	//squares that can't be attacked when king is castling
+	static long kingPathBB(Color us, PieceType side) {
+		return us == WHITE ? (side == KING ? betweenBB(D1.id, H1.id) : betweenBB(F1.id, B1.id)) : (side == KING ? betweenBB(D8.id, H8.id) : betweenBB(F8.id, B8.id));
+	}
+
+	//squares that can't be occupied when king is castling
+	static long castlingLineBB(Color us, PieceType side) {
+		return us == WHITE ? (side == KING ? betweenBB(D1.id, H1.id) : betweenBB(F1.id, A1.id)) : (side == KING ? betweenBB(D8.id, H8.id) : betweenBB(F8.id, A8.id));
+	}
+
+	//returns a bitboard of all pieces attacking a given line
+	private long attackersToLine(long lineBB) {
+		long attackers = 0;
+		while (lineBB != 0) {
+			int square = get_lsb(lineBB);
+			attackers |= attackersTo(square, pieces());
+			lineBB ^= squareBB(square);
+		}
+		return attackers;
+	}
+
+
+	private byte castling(Color us, PieceType side) {
+		return us == WHITE ? (side == KING ? WHITE_OO : WHITE_OOO) : (side == KING ? BLACK_OO : BLACK_OOO);
+	}
+
+	private byte anyCastling(Color us) {
+		return (byte) (us == WHITE ? 3 : 12);
+	}
 
 
 	private long attackersTo(int square, long occupiedBB) {
@@ -324,19 +462,6 @@ public class ePosition {
 		return pinned;
 	}
 
-	private boolean isLegal(Move move) {
-		int from = move.getFrom();
-		int to = move.getTo();
-		long fromBB = 1L << from;
-		long toBB = 1L << to;
-
-		if (fromBB == pieces(sideToMove.id, KING)) {
-			return (attackersTo(to, pieces() ^ fromBB) & pieces(sideToMove.id ^ 1)) == 0;
-		}
-
-		int kingSquare = getKingSquare(sideToMove.id);
-		return ((pinned(kingSquare, sideToMove) & fromBB) == 0) || (lineBB(kingSquare, from) & toBB) != 0;
-	}
 
 	private void BBtoLegalMoves(int from, long BB, MoveType moveType) {
 		while (BB != 0) {
@@ -348,67 +473,5 @@ public class ePosition {
 		}
 	}
 
-
-	public void generateEvasions() {
-		int us = sideToMove.id;
-		if (checkers == 0)
-			throw new IllegalStateException("Evasions can be generated only when sideToMove's king is in check");
-
-		int kingSq = getKingSquare(us);
-		long quietsKing = pseudoMovesBitboard(QUIET, sideToMove, KING, kingSq, pieces(us), pieces(us ^ 1));
-		long capturesKing = pseudoMovesBitboard(CAPTURE, sideToMove, KING, kingSq, pieces(us), pieces(us ^ 1));
-		BBtoLegalMoves(kingSq, quietsKing, QUIET);
-		BBtoLegalMoves(kingSq, capturesKing, CAPTURE);
-		// only king can move out of check
-		if (more_than_one_bit(checkers)) {
-			return;
-		}
-
-		long checkerBB = get_lsbBB(checkers);
-		int checkerSquare = get_lsb(checkers);
-		long kingSqBB = 1L << kingSq;
-		PieceType checkerType = board[checkerSquare].pieceType;
-		long betweenBB = (checkerType == QUEEN || checkerType == ROOK || checkerType == BISHOP)
-				? betweenBB(kingSqBB, checkerBB)
-				: 0;
-
-		// check blocking with other pieces and checker piece captures
-		for (PieceType pieceType : PieceType.values()) {
-			long piecesBB = pieces(us, pieceType);
-			while (piecesBB != 0) {
-				int lsb = get_lsb(piecesBB);
-				long from = 1L << lsb;
-				long movesBB = pseudoMovesBitboard(QUIET, sideToMove, pieceType, lsb, pieces(us), pieces(us ^ 1));
-				movesBB &= betweenBB;
-				while (movesBB != 0) {
-					int to = get_lsb(movesBB);
-					Move move = new Move(lsb, to, QUIET);
-					if (isLegal(move))
-						legalMoves.get(move.getFrom()).add(move);
-					movesBB ^= 1L << to;
-				}
-
-				movesBB = pseudoMovesBitboard(CAPTURE, sideToMove, pieceType, lsb, pieces(us), pieces(us ^ 1));
-				while (movesBB != 0) {
-					int to = get_lsb(movesBB);
-					if (((1L << to) & checkerBB) != 0) {
-						Move move = new Move(lsb, to, CAPTURE);
-						if (isLegal(move)) {
-							legalMoves.get(move.getFrom()).add(move);
-						}
-					}
-					movesBB ^= 1L << to;
-				}
-
-				if (epSquare != -1 && board[lsb].pieceType == PAWN && (pawnAttacks(sideToMove.inverse(), epSquare) & from) != 0 &&
-						(((squareBB(epSquare) & betweenBB) != 0) || checkerBB == pawnPush(sideToMove.inverse(), epSquare))) {
-					Move move = new Move(lsb, epSquare, EP_CAPTURE);
-					if (isLegal(move)) legalMoves.get(move.getFrom()).add(move);
-				}
-
-				piecesBB ^= from;
-			}
-		}
-	}
 
 }

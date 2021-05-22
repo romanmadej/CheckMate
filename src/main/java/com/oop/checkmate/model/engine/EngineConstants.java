@@ -7,6 +7,7 @@ import static com.oop.checkmate.Constants.PieceType.*;
 import static com.oop.checkmate.model.engine.BitboardUtils.squareBB;
 
 import com.oop.checkmate.Constants;
+import com.oop.checkmate.model.Piece;
 
 public final class EngineConstants {
 	private EngineConstants() {
@@ -63,7 +64,24 @@ public final class EngineConstants {
 				ROOK), W_QUEEN(WHITE, QUEEN), W_KING(WHITE, KING), B_PAWN(BLACK, PAWN), B_KNIGHT(BLACK,
 				KNIGHT), B_BISHOP(BLACK,
 				BISHOP), B_ROOK(BLACK, ROOK), B_QUEEN(BLACK, QUEEN), B_KING(BLACK, KING);
+		static ePiece get_ePiece(char typeChar) {
+			switch (typeChar) {
+				case 'p': return B_PAWN;
+				case 'n': return B_KNIGHT;
+				case 'b':return B_BISHOP;
+				case 'r': return B_ROOK;
+				case 'q': return B_QUEEN;
+				case 'k': return B_KING;
+				case 'P': return W_PAWN;
+				case 'N': return W_KNIGHT;
+				case 'B':return W_BISHOP;
+				case 'R': return W_ROOK;
+				case 'Q': return W_QUEEN;
+				case 'K': return W_KING;
+				default: throw new IllegalArgumentException(String.valueOf(typeChar));
+			}
 
+		}
 		Color color;
 		Constants.PieceType pieceType;
 

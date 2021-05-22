@@ -171,14 +171,14 @@ class Bitboards {
 		return betweenBB[a][b];
 	}
 
-	//both side inclusive lineBB between a and b
+	//bitboard of line crossing squares a and b e.g. lineBB(3, 5) is RANK1BB
 	static long lineBB(int a, int b) {
 		long aBB = 1L << a;
 		long bBB = 1L << b;
-		long aRook = slidingPseudoAttacks(ROOK, a, bBB, bBB);
-		long bRook = slidingPseudoAttacks(ROOK, b, aBB, aBB);
-		long aBishop = slidingPseudoAttacks(BISHOP, a, bBB, bBB);
-		long bBishop = slidingPseudoAttacks(BISHOP, b, aBB, aBB);
+		long aRook = slidingPseudoAttacks(ROOK, a, 0,0 );
+		long bRook = slidingPseudoAttacks(ROOK, b, 0,0 );
+		long aBishop = slidingPseudoAttacks(BISHOP, a, 0, 0);
+		long bBishop = slidingPseudoAttacks(BISHOP, b, 0, 0);
 		if ((aRook & bBB) != 0)
 			return (aRook & bRook) | aBB | bBB;
 		if ((aBishop & bBB) != 0)
