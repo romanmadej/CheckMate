@@ -1,7 +1,6 @@
 package com.oop.checkmate.model.engine;
 
 import java.util.List;
-import java.util.Locale;
 
 class MoveHistory {
     Move move;
@@ -37,19 +36,20 @@ public class Perft {
             return 1;
         }
         long nodes = 0;
-        for (List<Move> moves : pos.legalMoves) {
-            if (depth == maxDepth - 1) {
-                nodes += moves.size();
-                continue;
-            }
+        List<Move> legalMoves = pos.generateLegalMoves();
+        if (depth == maxDepth - 1) {
+            nodes += legalMoves.size();
+            return nodes;
+        }
+        for (Move move : legalMoves) {
+            if (depth == maxDepth - 1 && move.isCapture() || move.isEpCapture())
+                captures++;
+            MoveHistory nmh = new MoveHistory(move, mh);
 
-            for (Move move : moves) {
-                if (depth == maxDepth - 1 && move.isCapture() || move.isEpCapture())
-                    captures++;
-                MoveHistory nmh = new MoveHistory(move, mh);
-                nodes += dfs(pos.make_move(move), depth + 1, maxDepth, nmh);
+            pos.make_move(move);
+            nodes += dfs(pos, depth + 1, maxDepth, nmh);
+            pos.undoLastMove();
 
-            }
         }
         if (depth == 1)
             System.out.println(mh.move.getFromSquare().name().toLowerCase() + mh.move.getToSquare().name().toLowerCase() + ": " + nodes);

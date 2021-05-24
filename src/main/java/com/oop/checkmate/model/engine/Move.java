@@ -74,6 +74,10 @@ public class Move {
 		return (moveBB >>> 12) == 3;
 	}
 
+	public boolean isCastling() {
+		return isKingsideCastling() || isQueensideCastling();
+	}
+
 	public Position getFromPosition() {
 		int id = (int) (moveBB & ((1L << 6) - 1));
 		return Position.fromSquareId(id);

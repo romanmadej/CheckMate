@@ -104,8 +104,7 @@ public class MoveGeneratingTest {
 		TestCase.assertEquals(8902, Perft.dfs(new ePosition(), 0, 3, null));
 		TestCase.assertEquals(197281, Perft.dfs(new ePosition(), 0, 4, null));
 		TestCase.assertEquals(4865609, Perft.dfs(new ePosition(), 0, 5, null));
-		//takes some time
-//		TestCase.assertEquals(119060324, Perft.dfs(new ePosition(), 0, 6, null));
+		TestCase.assertEquals(119060324, Perft.dfs(new ePosition(), 0, 6, null));
 
 	}
 

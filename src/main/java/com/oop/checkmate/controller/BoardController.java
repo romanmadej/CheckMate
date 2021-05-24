@@ -131,7 +131,7 @@ public class BoardController {
 					}
 
 					boardModel.makeMove(move.get());
-					ePos = ePos.make_move(move.get());
+					ePos.make_move(move.get());
 //					ePos.print();
 					pieceView.setPosition(position);
 					boardView.highlightMove(move.get());
