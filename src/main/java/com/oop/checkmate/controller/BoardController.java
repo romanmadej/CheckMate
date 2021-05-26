@@ -1,7 +1,7 @@
 package com.oop.checkmate.controller;
 
-import static com.oop.checkmate.Constants.Color.WHITE;
 import static com.oop.checkmate.Constants.SQUARE_SIZE;
+import static com.oop.checkmate.Constants.Color.WHITE;
 
 import java.util.List;
 import java.util.Optional;

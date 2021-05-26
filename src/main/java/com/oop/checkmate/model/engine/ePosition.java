@@ -11,7 +11,10 @@ import static com.oop.checkmate.model.engine.EngineConstants.MoveType.*;
 import static com.oop.checkmate.model.engine.EngineConstants.Square.*;
 import static com.oop.checkmate.model.engine.EngineConstants.ePiece.*;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Locale;
 
 import com.oop.checkmate.model.Piece;
 
@@ -617,4 +620,73 @@ public class ePosition {
 		return pc.pieceType == PAWN && (squareBB(move.getTo()) & (pc.color == WHITE ? RANK8BB : RANK1BB)) != 0;
 	}
 
+	public String generateFen() {
+		int blankSpaces = 0;
+		StringBuilder fen = new StringBuilder();
+		for (int rank = 7; rank >= 0; rank--) {
+			for (int file = 0; file < 8; file++) {
+				ePiece eP = board[rank * 8 + file];
+				if (eP == NO_PIECE) {
+					blankSpaces++;
+					continue;
+				}
+				if (blankSpaces != 0) {
+					fen.append(blankSpaces);
+					blankSpaces = 0;
+				}
+				String piece = "";
+				if (eP.pieceType == PAWN) {
+					piece = "p";
+				} else if (eP.pieceType == KNIGHT) {
+					piece = "n";
+				} else if (eP.pieceType == BISHOP) {
+					piece = "b";
+				} else if (eP.pieceType == ROOK) {
+					piece = "r";
+				} else if (eP.pieceType == KING) {
+					piece = "k";
+				} else if (eP.pieceType == QUEEN) {
+					piece = "q";
+				}
+				if (eP.color == WHITE) {
+					piece = piece.toUpperCase();
+				}
+				fen.append(piece);
+			}
+			if (blankSpaces != 0) {
+				fen.append(blankSpaces);
+				blankSpaces = 0;
+			}
+			if (rank != 0) {
+				fen.append("/");
+			}
+		}
+		if (sideToMove == WHITE) {
+			fen.append(" w ");
+		} else {
+			fen.append(" b ");
+		}
+		boolean castle = false;
+		if ((castlingRights & WHITE_OO) == WHITE_OO) {
+			fen.append("K");
+			castle = true;
+		}
+		if ((castlingRights & WHITE_OOO) == WHITE_OOO) {
+			fen.append("Q");
+			castle = true;
+		}
+		if ((castlingRights & BLACK_OO) == BLACK_OO) {
+			fen.append("k");
+			castle = true;
+		}
+		if ((castlingRights & BLACK_OOO) == BLACK_OOO) {
+			fen.append("q");
+			castle = true;
+		}
+		if (!castle) {
+			fen.append("-");
+		}
+		fen.append(" - 0 1");
+		return fen.toString();
+	}
 }
