@@ -12,6 +12,7 @@ import com.oop.checkmate.model.Piece;
 import com.oop.checkmate.model.Position;
 import com.oop.checkmate.model.engine.BoardState;
 import com.oop.checkmate.model.engine.Move;
+import com.oop.checkmate.model.engine.PositionAnalysis;
 import com.oop.checkmate.view.BoardView;
 import com.oop.checkmate.view.PieceView;
 import com.oop.checkmate.view.PromotionDialog;
@@ -30,9 +31,12 @@ public class BoardController {
 
 	private final BoardState boardState;
 
-	public BoardController() {
+	private final boolean againstAI;
+
+	public BoardController(boolean againstAI) {
 		this.boardView = new BoardView();
 		this.boardState = new BoardState();
+		this.againstAI = againstAI;
 
 		InputHandler inputHandler = new InputHandler();
 
@@ -42,10 +46,14 @@ public class BoardController {
 				Piece piece = boardState.getPiece(position);
 				if (piece != Piece.NO_PIECE) {
 					PieceView pieceView = boardView.createPieceView(piece, position);
-					pieceView.setOnMousePressed(inputHandler.mousePressedHandler(pieceView));
-					pieceView.setOnMouseDragged(inputHandler.mouseDraggedHandler(pieceView));
-					pieceView.setOnMouseReleased(inputHandler.mouseReleasedHandler(pieceView));
-					pieceView.setPickOnBounds(true);
+
+					// todo add starting as black
+					if (!againstAI || piece.color == Constants.Color.WHITE) {
+						pieceView.setOnMousePressed(inputHandler.mousePressedHandler(pieceView));
+						pieceView.setOnMouseDragged(inputHandler.mouseDraggedHandler(pieceView));
+						pieceView.setOnMouseReleased(inputHandler.mouseReleasedHandler(pieceView));
+						pieceView.setPickOnBounds(true);
+					}
 				}
 			}
 		}
@@ -83,6 +91,11 @@ public class BoardController {
 			pieceView.setPiece(boardState.getPiece(move.getToPosition()));
 		}
 		boardState.getCheckedKing().ifPresent(boardView::highlightWarning);
+	}
+
+	private void makeAIMove() {
+		boardView.resetHighlight();
+		makeMove(new PositionAnalysis(boardState).Analysis(boardState));
 	}
 
 	private class InputHandler {
@@ -159,6 +172,9 @@ public class BoardController {
 
 				if (move != null) {
 					makeMove(move);
+					if (againstAI) {
+						makeAIMove();
+					}
 				}
 			};
 		}

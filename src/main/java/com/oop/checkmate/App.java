@@ -12,7 +12,7 @@ public class App extends Application {
 	@Override
 	public void start(Stage stage) {
 		int size = 8 * SQUARE_SIZE;
-		BoardController boardController = new BoardController();
+		BoardController boardController = new BoardController(true);
 		Scene scene = new Scene(boardController.getView(), size, size);
 		stage.setTitle("CheckMate");
 		stage.setScene(scene);
