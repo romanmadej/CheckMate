@@ -71,9 +71,8 @@ public class BoardController {
 			PieceView rookPieceView = boardView.getPieceView(new Position(0, rookY));
 			rookPieceView.setPosition(new Position(3, rookY));
 		}
-		boardState.makeMove(move);
 		boardView.getPieceView(move.getFromPosition()).setPosition(move.getToPosition());
-		boardView.highlightMove(move);
+		boardView.highlightDoneMove(move);
 	}
 
 	private class InputHandler {
@@ -94,7 +93,7 @@ public class BoardController {
 
 				boardView.resetHighlight();
 				legalMoves = boardState.getLegalMoves(initialPosition);
-				boardView.highlightTiles(legalMoves.stream().map(Move::getToPosition).collect(Collectors.toList()));
+				boardView.highlightPossibleMoves(legalMoves.stream().map(Move::getToPosition).collect(Collectors.toList()));
 				pieceView.setViewOrder(-1);
 			};
 		}
@@ -142,18 +141,22 @@ public class BoardController {
 				// we dont want pieceView to collide in getPieceView(...)
 				pieceView.setPosition(initialPosition);
 
-				if (move != null) {
-					visualizeMove(move);
-					if (move.isPromotion()) {
-						pieceView.setPiece(boardState.getPiece(position));
-					}
-				}
-
 				boardView.resetHighlight();
 				pieceView.setViewOrder(0);
 				initialPosition = null;
 				mouseOffsetX = mouseOffsetY = null;
 				legalMoves = null;
+
+				if (move == null) {
+					return;
+				}
+
+				boardState.makeMove(move);
+				visualizeMove(move);
+				if (move.isPromotion()) {
+					pieceView.setPiece(boardState.getPiece(position));
+				}
+				boardState.getCheckedKing().ifPresent(boardView::highlightWarning);
 			};
 		}
 	}

@@ -11,10 +11,7 @@ import static com.oop.checkmate.model.engine.EngineConstants.*;
 import static com.oop.checkmate.model.engine.EngineConstants.MoveType.*;
 import static com.oop.checkmate.model.engine.EngineConstants.Square.*;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
 
 import com.oop.checkmate.model.Piece;
 import com.oop.checkmate.model.Position;
@@ -691,5 +688,12 @@ public class BoardState {
 
 	public Piece getPiece(Position position) {
 		return board[position.getSquareId()];
+	}
+
+	public Optional<Position> getCheckedKing() {
+		if (checkers == 0) {
+			return Optional.empty();
+		}
+		return Optional.of(Position.fromSquareId(getKingSquare(sideToMove.id)));
 	}
 }

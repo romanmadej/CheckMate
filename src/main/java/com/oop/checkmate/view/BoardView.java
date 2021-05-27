@@ -62,16 +62,25 @@ public class BoardView extends Group {
 		throw new NoSuchElementException();
 	}
 
-	private void highlightTiles(Iterable<Position> positions, Color color) {
-		positions.forEach(p -> overlayTiles[p.y][p.x].setFill(color.deriveColor(0, 1, 1, 0.2)));
+	private void highlightTile(Position position, Color color) {
+		overlayTiles[position.y][position.x].setFill(color.deriveColor(0, 1, 1, 0.2));
 	}
 
-	public void highlightTiles(Iterable<Position> positions) {
+	private void highlightTiles(Iterable<Position> positions, Color color) {
+		positions.forEach(p -> highlightTile(p, color));
+	}
+
+	public void highlightPossibleMoves(Iterable<Position> positions) {
 		highlightTiles(positions, Color.GREEN);
 	}
 
-	public void highlightMove(Move move) {
-		highlightTiles(List.of(move.getFromPosition(), move.getToPosition()), Color.YELLOW);
+	public void highlightDoneMove(Move move) {
+		highlightTile(move.getFromPosition(), Color.YELLOW);
+		highlightTile(move.getToPosition(), Color.YELLOW);
+	}
+
+	public void highlightWarning(Position position) {
+		highlightTile(position, Color.RED);
 	}
 
 	public void resetHighlight() {
