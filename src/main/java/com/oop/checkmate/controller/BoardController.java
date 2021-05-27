@@ -52,7 +52,8 @@ public class BoardController {
 	}
 
 	// make sure before calling that every PieceView is aligned in its square
-	private void visualizeMove(Move move) {
+	private void makeMove(Move move) {
+		// board state before move
 		if (move.isRegularCapture() || (move.isPromotion() && move.isCapture())) {
 			boardView.getChildren().remove(boardView.getPieceView(move.getToPosition()));
 		}
@@ -71,8 +72,17 @@ public class BoardController {
 			PieceView rookPieceView = boardView.getPieceView(new Position(0, rookY));
 			rookPieceView.setPosition(new Position(3, rookY));
 		}
-		boardView.getPieceView(move.getFromPosition()).setPosition(move.getToPosition());
+		PieceView pieceView = boardView.getPieceView(move.getFromPosition());
+		pieceView.setPosition(move.getToPosition());
 		boardView.highlightDoneMove(move);
+
+		boardState.makeMove(move);
+
+		// board state after move
+		if (move.isPromotion()) {
+			pieceView.setPiece(boardState.getPiece(move.getToPosition()));
+		}
+		boardState.getCheckedKing().ifPresent(boardView::highlightWarning);
 	}
 
 	private class InputHandler {
@@ -147,16 +157,9 @@ public class BoardController {
 				mouseOffsetX = mouseOffsetY = null;
 				legalMoves = null;
 
-				if (move == null) {
-					return;
+				if (move != null) {
+					makeMove(move);
 				}
-
-				boardState.makeMove(move);
-				visualizeMove(move);
-				if (move.isPromotion()) {
-					pieceView.setPiece(boardState.getPiece(position));
-				}
-				boardState.getCheckedKing().ifPresent(boardView::highlightWarning);
 			};
 		}
 	}
