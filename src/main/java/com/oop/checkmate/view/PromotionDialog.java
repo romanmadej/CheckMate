@@ -3,6 +3,7 @@ package com.oop.checkmate.view;
 import com.oop.checkmate.Constants;
 import com.oop.checkmate.model.Piece;
 
+import javafx.scene.Cursor;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
@@ -22,6 +23,7 @@ public class PromotionDialog extends Dialog<Constants.PieceType> {
 		hbox.getChildren().add(new PromotionButton(Piece.getPiece(color, Constants.PieceType.QUEEN)));
 		getDialogPane().setContent(hbox);
 		getDialogPane().getButtonTypes().addAll(ButtonType.CANCEL);
+		getDialogPane().lookupButton(ButtonType.CANCEL).setCursor(Cursor.HAND);
 	}
 
 	private class PromotionButton extends Label {
@@ -31,6 +33,7 @@ public class PromotionDialog extends Dialog<Constants.PieceType> {
 			this.pieceType = piece.pieceType;
 			setGraphic(new PieceView(piece));
 			setOnMouseClicked(this::onMousePressed);
+			setCursor(Cursor.HAND);
 		}
 
 		private void onMousePressed(MouseEvent e) {

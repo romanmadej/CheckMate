@@ -18,6 +18,7 @@ import com.oop.checkmate.view.PieceView;
 import com.oop.checkmate.view.PromotionDialog;
 
 import javafx.event.EventHandler;
+import javafx.scene.Cursor;
 import javafx.scene.Parent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
@@ -53,6 +54,7 @@ public class BoardController {
 						pieceView.setOnMouseDragged(inputHandler.mouseDraggedHandler(pieceView));
 						pieceView.setOnMouseReleased(inputHandler.mouseReleasedHandler(pieceView));
 						pieceView.setPickOnBounds(true);
+						pieceView.setCursor(Cursor.OPEN_HAND);
 					}
 				}
 			}
@@ -109,6 +111,8 @@ public class BoardController {
 				if (event.getButton() != MouseButton.PRIMARY) {
 					return;
 				}
+				pieceView.setCursor(Cursor.CLOSED_HAND);
+
 				initialPosition = pieceView.getPosition();
 				mouseOffsetX = event.getX() - pieceView.getX();
 				mouseOffsetY = event.getY() - pieceView.getY();
@@ -135,6 +139,8 @@ public class BoardController {
 				if (event.getButton() != MouseButton.PRIMARY) {
 					return;
 				}
+				pieceView.setCursor(Cursor.OPEN_HAND);
+
 				// target position is determined by image center
 				double centerX = event.getX() - mouseOffsetX + SQUARE_SIZE / 2.0;
 				double centerY = event.getY() - mouseOffsetY + SQUARE_SIZE / 2.0;
