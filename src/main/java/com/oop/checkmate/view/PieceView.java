@@ -4,7 +4,7 @@ import static com.oop.checkmate.Constants.SQUARE_SIZE;
 
 import com.oop.checkmate.Constants;
 import com.oop.checkmate.model.Position;
-import com.oop.checkmate.model.ePiece;
+import com.oop.checkmate.model.Piece;
 
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -21,7 +21,7 @@ public class PieceView extends ImageView {
 		}
 	}
 
-	public PieceView(ePiece piece) {
+	public PieceView(Piece piece) {
 		super();
 		this.setImage(images[piece.color.ordinal()][piece.pieceType.ordinal()]);
 		this.setFitWidth(SQUARE_SIZE);

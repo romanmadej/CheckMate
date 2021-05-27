@@ -5,58 +5,58 @@ import static com.oop.checkmate.model.engine.EngineConstants.*;
 import java.util.List;
 
 import com.oop.checkmate.Constants;
-import com.oop.checkmate.model.ePiece;
+import com.oop.checkmate.model.Piece;
 
 
 public class PositionAnalysis {
-    public ePosition CurrentPosition;
+    public BoardState CurrentPosition;
 
-    public PositionAnalysis(ePosition board){
-        CurrentPosition = new ePosition(board.generateFen());
+    public PositionAnalysis(BoardState board){
+        CurrentPosition = new BoardState(board.generateFen());
     }
 
 
-    public Move Analysis(ePosition ePos){
-        List <Move> Candidates = ePos.generateLegalMoves();
+    public Move Analysis(BoardState boardState){
+        List <Move> Candidates = boardState.generateLegalMoves();
         Move BestMove = null;
 		double eval = -2010;
         for(Move move :Candidates){
-            ePos.make_move(move);
-			double res = -Analyse(0, ePos);
+            boardState.makeMove(move);
+			double res = -Analyse(0, boardState);
             if(res > eval){
                 System.out.println(res);
                 eval = res;
                 BestMove = move;
             }
-            ePos.undoLastMove();
+            boardState.undoLastMove();
         }
         return BestMove;
     }
 
-	public double Analyse(int depth, ePosition ePos) {
+	public double Analyse(int depth, BoardState boardState) {
 		double eval = -2010;
         if(depth == 2){
-            return Evaluation(ePos);
+            return Evaluation(boardState);
         }
-        List <Move> Candidates = ePos.generateLegalMoves();
+        List <Move> Candidates = boardState.generateLegalMoves();
         if(Candidates.isEmpty()){
 			return -2000;
         }
         for(Move move : Candidates){
-            ePos.make_move(move);
-			double res = -Analyse(depth + 1, ePos);
+            boardState.makeMove(move);
+			double res = -Analyse(depth + 1, boardState);
             if(res >= eval){
                 eval = res;
             }
-            ePos.undoLastMove();
+            boardState.undoLastMove();
         }
         return eval;
 	}
 
-	public double Evaluation(ePosition ePos) {
-		ePos.generateLegalMoves();
+	public double Evaluation(BoardState boardState) {
+		boardState.generateLegalMoves();
 		boolean checkmate = false;
-		List<Move> legal = ePos.generateLegalMoves();
+		List<Move> legal = boardState.generateLegalMoves();
 		if (legal.isEmpty()) {
 			checkmate = true;
 		}
@@ -66,11 +66,11 @@ public class PositionAnalysis {
 		double player = 0;
 		double opponent = 0;
 		for (int i = 0; i < 64; i++) {
-			ePiece piece = ePos.board[i];
-			if (piece == ePiece.NO_PIECE) {
+			Piece piece = boardState.board[i];
+			if (piece == Piece.NO_PIECE) {
 				continue;
 			}
-			if (piece.color == ePos.sideToMove) {
+			if (piece.color == boardState.sideToMove) {
 				player += PieceValues(piece, i);
 			} else {
 				opponent += PieceValues(piece, i);
@@ -79,7 +79,7 @@ public class PositionAnalysis {
 		return player - opponent;
 	}
 
-	double PieceValues(ePiece piece, int position) {
+	double PieceValues(Piece piece, int position) {
 		if (piece.color == Constants.Color.WHITE) {
 			if (piece.pieceType == Constants.PieceType.PAWN) {
 				return 10 + wPawnValue[position];

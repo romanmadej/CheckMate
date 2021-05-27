@@ -29,7 +29,7 @@ class MoveHistory {
 public class Perft {
     static long captures = 0, checks = 0;
 
-    static long dfs(ePosition pos, int depth, int maxDepth, MoveHistory mh) {
+    static long dfs(BoardState pos, int depth, int maxDepth, MoveHistory mh) {
         if (depth == maxDepth && pos.checkers != 0)
             checks++;
         if (depth == maxDepth) {
@@ -46,7 +46,7 @@ public class Perft {
                 captures++;
             MoveHistory nmh = new MoveHistory(move, mh);
 
-            pos.make_move(move);
+            pos.makeMove(move);
             nodes += dfs(pos, depth + 1, maxDepth, nmh);
             pos.undoLastMove();
 

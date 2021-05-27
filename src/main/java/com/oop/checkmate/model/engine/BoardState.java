@@ -4,7 +4,7 @@ import static com.oop.checkmate.Constants.*;
 import static com.oop.checkmate.Constants.Color.BLACK;
 import static com.oop.checkmate.Constants.Color.WHITE;
 import static com.oop.checkmate.Constants.PieceType.*;
-import static com.oop.checkmate.model.ePiece.*;
+import static com.oop.checkmate.model.Piece.*;
 import static com.oop.checkmate.model.engine.BitboardUtils.*;
 import static com.oop.checkmate.model.engine.Bitboards.*;
 import static com.oop.checkmate.model.engine.EngineConstants.*;
@@ -17,19 +17,19 @@ import java.util.List;
 import java.util.Locale;
 
 import com.oop.checkmate.model.Position;
-import com.oop.checkmate.model.ePiece;
+import com.oop.checkmate.model.Piece;
 
-public class ePosition {
+public class BoardState {
 	Color sideToMove;
 	long[] byTypeBB;
 	long[] byColorBB;
-	ePiece[] board;
+	Piece[] board;
 	int epSquare;
 	byte castlingRights;
 
 	StateInfo prev;
 	Move lastMove;
-	ePiece capturedPiece;
+	Piece capturedPiece;
 	long checkers; // opposing color pieces giving check
 	static final List<Move> EMPTY_LIST = new ArrayList<>();
 
@@ -38,10 +38,10 @@ public class ePosition {
 		byte castlingRights;
 		long checkers;
 		Move prevMove;
-		ePiece prevCaptured;
+		Piece prevCaptured;
 		StateInfo prevSt;
 
-		StateInfo(int epSquare, byte castlingRights, long checkers, Move prevMove, ePiece prevCaptured, StateInfo prevSt) {
+		StateInfo(int epSquare, byte castlingRights, long checkers, Move prevMove, Piece prevCaptured, StateInfo prevSt) {
 			this.epSquare = epSquare;
 			this.castlingRights = castlingRights;
 			this.checkers = checkers;
@@ -52,14 +52,14 @@ public class ePosition {
 	}
 
 	// starting position constructor
-	public ePosition() {
+	public BoardState() {
 		this("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
 	}
 
-	public ePosition(String fenString) {
+	public BoardState(String fenString) {
 		byTypeBB = new long[PIECE_TYPE_N + 1];
 		byColorBB = new long[COLOR_N];
-		board = new ePiece[64];
+		board = new Piece[64];
 		Arrays.fill(board, NO_PIECE);
 
 		fenString = fenString.trim();
@@ -73,7 +73,7 @@ public class ePosition {
 				squareId += Character.digit(c, 10);
 				continue;
 			}
-			ePiece pc = get_ePiece(c);
+			Piece pc = Piece.getPiece(c);
 			board[sq] = pc;
 			byTypeBB[pc.pieceType.id] ^= squareBB(sq);
 			byTypeBB[ALL_PIECES] ^= squareBB(sq);
@@ -310,7 +310,7 @@ public class ePosition {
 	}
 
 
-	public void make_move(Move move) {
+	public void makeMove(Move move) {
 		prev = new StateInfo(epSquare, castlingRights, checkers, lastMove, capturedPiece, prev);
 		lastMove = move;
 
@@ -345,7 +345,7 @@ public class ePosition {
 					break;
 			}
 		}
-		move_piece(move);
+		movePiece(move);
 
 
 		if (move.getMoveType() == KINGSIDE_CASTLE.id || move.getMoveType() == QUEENSIDE_CASTLE.id) {
@@ -354,7 +354,7 @@ public class ePosition {
 			if (board[rookFrom].pieceType != ROOK || board[rookTo] != NO_PIECE)
 				throw new IllegalStateException("castling is not legal");
 			//either of kingside and queenside movetypes could be passed
-			move_piece(new Move(rookFrom, rookTo, KINGSIDE_CASTLE.id));
+			movePiece(new Move(rookFrom, rookTo, KINGSIDE_CASTLE.id));
 		}
 
 
@@ -449,7 +449,7 @@ public class ePosition {
 	}
 
 
-	private void move_piece(Move move) {
+	private void movePiece(Move move) {
 		int from = move.getFrom(), to = move.getTo();
 		if (board[from] == NO_PIECE)
 			throw new IllegalStateException("from square is empty");
@@ -490,7 +490,7 @@ public class ePosition {
 			PieceType promoType = move.getPromotionPieceType();
 			byTypeBB[fPieceType] ^= fromBB;
 			byTypeBB[promoType.id] ^= toBB;
-			board[to] = get_ePiece(sideToMove, promoType);
+			board[to] = Piece.getPiece(sideToMove, promoType);
 		} else {
 			byTypeBB[fPieceType] ^= fromTo;
 			board[to] = board[from];
@@ -615,7 +615,7 @@ public class ePosition {
 	}
 
 	private boolean isPawnPromotion(Move move) {
-		ePiece pc = board[move.getFrom()];
+		Piece pc = board[move.getFrom()];
 		return pc.pieceType == PAWN && (squareBB(move.getTo()) & (pc.color == WHITE ? RANK8BB : RANK1BB)) != 0;
 	}
 
@@ -624,8 +624,8 @@ public class ePosition {
 		StringBuilder fen = new StringBuilder();
 		for (int rank = 7; rank >= 0; rank--) {
 			for (int file = 0; file < 8; file++) {
-				ePiece eP = board[rank * 8 + file];
-				if (eP == NO_PIECE) {
+				Piece piece = board[rank * 8 + file];
+				if (piece == NO_PIECE) {
 					blankSpaces++;
 					continue;
 				}
@@ -633,24 +633,24 @@ public class ePosition {
 					fen.append(blankSpaces);
 					blankSpaces = 0;
 				}
-				String piece = "";
-				if (eP.pieceType == PAWN) {
-					piece = "p";
-				} else if (eP.pieceType == KNIGHT) {
-					piece = "n";
-				} else if (eP.pieceType == BISHOP) {
-					piece = "b";
-				} else if (eP.pieceType == ROOK) {
-					piece = "r";
-				} else if (eP.pieceType == KING) {
-					piece = "k";
-				} else if (eP.pieceType == QUEEN) {
-					piece = "q";
+				String pieceChar = "";
+				if (piece.pieceType == PAWN) {
+					pieceChar = "p";
+				} else if (piece.pieceType == KNIGHT) {
+					pieceChar = "n";
+				} else if (piece.pieceType == BISHOP) {
+					pieceChar = "b";
+				} else if (piece.pieceType == ROOK) {
+					pieceChar = "r";
+				} else if (piece.pieceType == KING) {
+					pieceChar = "k";
+				} else if (piece.pieceType == QUEEN) {
+					pieceChar = "q";
 				}
-				if (eP.color == WHITE) {
-					piece = piece.toUpperCase();
+				if (piece.color == WHITE) {
+					pieceChar = pieceChar.toUpperCase();
 				}
-				fen.append(piece);
+				fen.append(pieceChar);
 			}
 			if (blankSpaces != 0) {
 				fen.append(blankSpaces);
@@ -689,7 +689,7 @@ public class ePosition {
 		return fen.toString();
 	}
 
-	public ePiece getPiece(Position position) {
+	public Piece getPiece(Position position) {
 		return board[position.getSquareId()];
 	}
 }

@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 
 import com.oop.checkmate.model.Position;
-import com.oop.checkmate.model.ePiece;
+import com.oop.checkmate.model.Piece;
 import com.oop.checkmate.model.engine.Move;
 
 import javafx.scene.Group;
@@ -41,7 +41,7 @@ public class BoardView extends Group {
 		this.getChildren().add(highlightBoard);
 	}
 
-	public PieceView createPieceView(ePiece piece, Position position) {
+	public PieceView createPieceView(Piece piece, Position position) {
 		PieceView pieceView = new PieceView(piece);
 		pieceView.setPosition(position);
 		this.getChildren().add(pieceView);

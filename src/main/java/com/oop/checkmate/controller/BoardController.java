@@ -8,9 +8,9 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import com.oop.checkmate.model.Position;
-import com.oop.checkmate.model.ePiece;
+import com.oop.checkmate.model.Piece;
 import com.oop.checkmate.model.engine.Move;
-import com.oop.checkmate.model.engine.ePosition;
+import com.oop.checkmate.model.engine.BoardState;
 import com.oop.checkmate.view.BoardView;
 import com.oop.checkmate.view.PieceView;
 
@@ -26,19 +26,19 @@ public class BoardController {
 		return boardView;
 	}
 
-	private final ePosition ePos;
+	private final BoardState boardState;
 
 	public BoardController() {
 		this.boardView = new BoardView();
-		this.ePos = new ePosition();
+		this.boardState = new BoardState();
 
 		InputHandler inputHandler = new InputHandler();
 
 		for (int y = 0; y < 8; ++y) {
 			for (int x = 0; x < 8; ++x) {
 				Position position = new Position(x, y);
-				ePiece piece = ePos.getPiece(position);
-				if (piece != ePiece.NO_PIECE) {
+				Piece piece = boardState.getPiece(position);
+				if (piece != Piece.NO_PIECE) {
 					PieceView pieceView = boardView.createPieceView(piece, position);
 					pieceView.setOnMousePressed(inputHandler.mousePressedHandler(pieceView));
 					pieceView.setOnMouseDragged(inputHandler.mouseDraggedHandler(pieceView));
@@ -66,7 +66,7 @@ public class BoardController {
 				System.out.println("source: " + initialPosition);
 
 				boardView.resetHighlight();
-				legalMoves = ePos.getLegalMoves(initialPosition);
+				legalMoves = boardState.getLegalMoves(initialPosition);
 				boardView.highlightTiles(legalMoves.stream().map(Move::getToPosition).collect(Collectors.toList()));
 				pieceView.setViewOrder(-1);
 			};
@@ -105,7 +105,7 @@ public class BoardController {
 						boardView.getChildren().add(pieceView);
 					}
 					if (move.get().isEpCapture()) {
-						int capturedY = ePos.getSideToMove() == WHITE ? position.y + 1 : position.y - 1;
+						int capturedY = boardState.getSideToMove() == WHITE ? position.y + 1 : position.y - 1;
 						int capturedX = position.x;
 						boardView.getChildren().remove(pieceView);
 						boardView.getChildren().remove(boardView.getPieceView(new Position(capturedX, capturedY)));
@@ -113,21 +113,20 @@ public class BoardController {
 					}
 					if (move.get().isKingsideCastling()) {
 						int rookFromX = 7;
-						int rookFromY = ePos.getSideToMove() == WHITE ? 7 : 0;
+						int rookFromY = boardState.getSideToMove() == WHITE ? 7 : 0;
 						PieceView rookPieceView = boardView.getPieceView(new Position(rookFromX, rookFromY));
-						int rookToY = ePos.getSideToMove() == WHITE ? 7 : 0;
+						int rookToY = boardState.getSideToMove() == WHITE ? 7 : 0;
 						rookPieceView.setPosition(new Position(5, rookFromY));
 					}
 					if (move.get().isQueensideCastling()) {
 						int rookFromX = 0;
-						int rookFromY = ePos.getSideToMove() == WHITE ? 7 : 0;
+						int rookFromY = boardState.getSideToMove() == WHITE ? 7 : 0;
 						PieceView rookPieceView = boardView.getPieceView(new Position(rookFromX, rookFromY));
-						int rookToY = ePos.getSideToMove() == WHITE ? 7 : 0;
+						int rookToY = boardState.getSideToMove() == WHITE ? 7 : 0;
 						rookPieceView.setPosition(new Position(3, rookFromY));
 					}
 
-					ePos.make_move(move.get());
-//					ePos.print();
+					boardState.makeMove(move.get());
 					pieceView.setPosition(position);
 					boardView.highlightMove(move.get());
 				} else {

@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.oop.checkmate.Constants;
-import com.oop.checkmate.model.ePiece;
+import com.oop.checkmate.model.Piece;
 
 /*
 Bitboard constants precalculated
@@ -96,8 +96,8 @@ class Bitboards {
 				& (moveType == QUIET ? ~(alliesBB | opponentsBB) : opponentsBB);
 	}
 
-	//consider moving to ePosition and changing to non-static
-	static List<Move> generatePseudoMoves(int squareId, ePiece piece, long alliesBitboard,
+	//consider moving to BoardState and changing to non-static
+	static List<Move> generatePseudoMoves(int squareId, Piece piece, long alliesBitboard,
 										  long opponentsBitboard, int epSquare) {
 		List<Move> moves = new ArrayList<>();
 
