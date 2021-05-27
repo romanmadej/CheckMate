@@ -7,9 +7,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import com.oop.checkmate.model.Board;
-import com.oop.checkmate.model.Piece;
 import com.oop.checkmate.model.Position;
+import com.oop.checkmate.model.ePiece;
 import com.oop.checkmate.model.engine.Move;
 import com.oop.checkmate.model.engine.ePosition;
 import com.oop.checkmate.view.BoardView;
@@ -27,12 +26,9 @@ public class BoardController {
 		return boardView;
 	}
 
-	private final Board boardModel;
-
-	private ePosition ePos;
+	private final ePosition ePos;
 
 	public BoardController() {
-		this.boardModel = new Board();
 		this.boardView = new BoardView();
 		this.ePos = new ePosition();
 
@@ -41,8 +37,8 @@ public class BoardController {
 		for (int y = 0; y < 8; ++y) {
 			for (int x = 0; x < 8; ++x) {
 				Position position = new Position(x, y);
-				Piece piece = boardModel.getPiece(position);
-				if (piece != null) {
+				ePiece piece = ePos.getPiece(position);
+				if (piece != ePiece.NO_PIECE) {
 					PieceView pieceView = boardView.createPieceView(piece, position);
 					pieceView.setOnMousePressed(inputHandler.mousePressedHandler(pieceView));
 					pieceView.setOnMouseDragged(inputHandler.mouseDraggedHandler(pieceView));
@@ -70,7 +66,7 @@ public class BoardController {
 				System.out.println("source: " + initialPosition);
 
 				boardView.resetHighlight();
-				legalMoves = boardModel.getLegalMoves(initialPosition, ePos);
+				legalMoves = ePos.getLegalMoves(initialPosition);
 				boardView.highlightTiles(legalMoves.stream().map(Move::getToPosition).collect(Collectors.toList()));
 				pieceView.setViewOrder(-1);
 			};
@@ -130,7 +126,6 @@ public class BoardController {
 						rookPieceView.setPosition(new Position(3, rookFromY));
 					}
 
-					boardModel.makeMove(move.get());
 					ePos.make_move(move.get());
 //					ePos.print();
 					pieceView.setPosition(position);

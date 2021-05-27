@@ -5,6 +5,7 @@ import static com.oop.checkmate.model.engine.EngineConstants.*;
 import java.util.List;
 
 import com.oop.checkmate.Constants;
+import com.oop.checkmate.model.ePiece;
 
 
 public class PositionAnalysis {
@@ -65,8 +66,8 @@ public class PositionAnalysis {
 		double player = 0;
 		double opponent = 0;
 		for (int i = 0; i < 64; i++) {
-			EngineConstants.ePiece piece = ePos.board[i];
-			if (piece == EngineConstants.ePiece.NO_PIECE) {
+			ePiece piece = ePos.board[i];
+			if (piece == ePiece.NO_PIECE) {
 				continue;
 			}
 			if (piece.color == ePos.sideToMove) {
@@ -78,7 +79,7 @@ public class PositionAnalysis {
 		return player - opponent;
 	}
 
-	double PieceValues(EngineConstants.ePiece piece, int position) {
+	double PieceValues(ePiece piece, int position) {
 		if (piece.color == Constants.Color.WHITE) {
 			if (piece.pieceType == Constants.PieceType.PAWN) {
 				return 10 + wPawnValue[position];

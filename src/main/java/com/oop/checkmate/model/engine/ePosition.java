@@ -4,19 +4,20 @@ import static com.oop.checkmate.Constants.*;
 import static com.oop.checkmate.Constants.Color.BLACK;
 import static com.oop.checkmate.Constants.Color.WHITE;
 import static com.oop.checkmate.Constants.PieceType.*;
+import static com.oop.checkmate.model.ePiece.*;
 import static com.oop.checkmate.model.engine.BitboardUtils.*;
 import static com.oop.checkmate.model.engine.Bitboards.*;
 import static com.oop.checkmate.model.engine.EngineConstants.*;
 import static com.oop.checkmate.model.engine.EngineConstants.MoveType.*;
 import static com.oop.checkmate.model.engine.EngineConstants.Square.*;
-import static com.oop.checkmate.model.engine.EngineConstants.ePiece.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
-import com.oop.checkmate.model.Piece;
+import com.oop.checkmate.model.Position;
+import com.oop.checkmate.model.ePiece;
 
 public class ePosition {
 	Color sideToMove;
@@ -146,14 +147,13 @@ public class ePosition {
 		printBB(castlingRights);
 	}
 
-	public List<Move> getLegalMoves(int square) {
+	public List<Move> getLegalMoves(Position position) {
 		List<Move> legalFrom = new ArrayList<>();
 		List<Move> legal = generateLegalMoves();
 		for (Move m : legal)
-			if (m.getFrom() == square)
+			if (m.getFrom() == position.getSquareId())
 				legalFrom.add(m);
 		return legalFrom;
-
 	}
 
 	public List<Move> generateLegalMoves() {
@@ -170,8 +170,7 @@ public class ePosition {
 		while (pieces != 0) {
 			int from = get_lsb(pieces);
 			long lsbBB = 1L << from;
-			List<Move> pseudoMoves = generatePseudoMoves(from, new Piece(board[from].pieceType, board[from].color),
-					pieces(us), pieces(us ^ 1), epSquare);
+			List<Move> pseudoMoves = generatePseudoMoves(from, board[from], pieces(us), pieces(us ^ 1), epSquare);
 			for (Move move : pseudoMoves) {
 				if (isLegal(move))
 					if (isPawnPromotion(move)) {
@@ -688,5 +687,9 @@ public class ePosition {
 		}
 		fen.append(" - 0 1");
 		return fen.toString();
+	}
+
+	public ePiece getPiece(Position position) {
+		return board[position.getSquareId()];
 	}
 }

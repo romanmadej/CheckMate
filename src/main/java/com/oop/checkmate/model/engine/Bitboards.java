@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.oop.checkmate.Constants;
-import com.oop.checkmate.model.Piece;
+import com.oop.checkmate.model.ePiece;
 
 /*
 Bitboard constants precalculated
@@ -97,12 +97,12 @@ class Bitboards {
 	}
 
 	//consider moving to ePosition and changing to non-static
-	static List<Move> generatePseudoMoves(int squareId, Piece piece, long alliesBitboard,
+	static List<Move> generatePseudoMoves(int squareId, ePiece piece, long alliesBitboard,
 										  long opponentsBitboard, int epSquare) {
 		List<Move> moves = new ArrayList<>();
 
 		// using naive scan for now
-		long movesBB = pseudoMovesBitboard(QUIET, piece.getColor(), piece.getPieceType(), squareId, alliesBitboard,
+		long movesBB = pseudoMovesBitboard(QUIET, piece.color, piece.pieceType, squareId, alliesBitboard,
 				opponentsBitboard);
 		while (movesBB != 0) {
 			int lsb = get_lsb(movesBB);
@@ -110,15 +110,15 @@ class Bitboards {
 			movesBB &= ~(1L << lsb);
 		}
 
-		movesBB = pseudoMovesBitboard(CAPTURE, piece.getColor(), piece.getPieceType(), squareId, alliesBitboard,
+		movesBB = pseudoMovesBitboard(CAPTURE, piece.color, piece.pieceType, squareId, alliesBitboard,
 				opponentsBitboard);
 		while (movesBB != 0) {
 			int lsb = get_lsb(movesBB);
 			moves.add(new Move(squareId, lsb, CAPTURE.id));
 			movesBB &= ~(1L << lsb);
 		}
-		Constants.Color us = piece.getColor();
-		if (piece.getPieceType() == PAWN && epSquare != -1 && (pawnAttacks(us.inverse(), epSquare) & squareBB(squareId)) != 0)
+		Constants.Color us = piece.color;
+		if (piece.pieceType == PAWN && epSquare != -1 && (pawnAttacks(us.inverse(), epSquare) & squareBB(squareId)) != 0)
 			moves.add(new Move(squareId, epSquare, EP_CAPTURE));
 
 		return moves;
