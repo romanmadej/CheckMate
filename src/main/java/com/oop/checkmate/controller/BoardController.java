@@ -7,12 +7,14 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import com.oop.checkmate.model.Position;
+import com.oop.checkmate.Constants;
 import com.oop.checkmate.model.Piece;
-import com.oop.checkmate.model.engine.Move;
+import com.oop.checkmate.model.Position;
 import com.oop.checkmate.model.engine.BoardState;
+import com.oop.checkmate.model.engine.Move;
 import com.oop.checkmate.view.BoardView;
 import com.oop.checkmate.view.PieceView;
+import com.oop.checkmate.view.PromotionDialog;
 
 import javafx.event.EventHandler;
 import javafx.scene.Parent;
@@ -119,16 +121,36 @@ public class BoardController {
 				Position position = new Position(x, y);
 				System.out.println("target: " + position + " (" + centerX + ", " + centerY + ")");
 
+				List<Move> moves = legalMoves.stream().filter(m -> m.getToPosition().equals(position))
+						.collect(Collectors.toList());
+
+				Move move = null;
+				if (!moves.isEmpty()) {
+					if (!moves.get(0).isPromotion()) {
+						move = moves.get(0);
+					} else {
+						Optional<Constants.PieceType> result = new PromotionDialog(boardState.getSideToMove())
+								.showAndWait();
+						if (result.isPresent()) {
+							move = moves.stream().filter(m -> m.getPromotionPieceType() == result.get()).findFirst()
+									.orElseGet(() -> null);
+						}
+					}
+				}
+
 				// very important, has to be called before visualizeMove(...)
 				// we dont want pieceView to collide in getPieceView(...)
 				pieceView.setPosition(initialPosition);
 
+				if (move != null) {
+					visualizeMove(move);
+					if (move.isPromotion()) {
+						pieceView.setPiece(boardState.getPiece(position));
+					}
+				}
+
 				boardView.resetHighlight();
 				pieceView.setViewOrder(0);
-
-				Optional<Move> move = legalMoves.stream().filter(m -> m.getToPosition().equals(position)).findFirst();
-				move.ifPresent(BoardController.this::visualizeMove);
-
 				initialPosition = null;
 				mouseOffsetX = mouseOffsetY = null;
 				legalMoves = null;

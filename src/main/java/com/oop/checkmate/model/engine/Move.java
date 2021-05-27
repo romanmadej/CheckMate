@@ -93,7 +93,7 @@ public class Move {
 		return ((moveBB >> 15) & 1) != 0;
 	}
 
-	Constants.PieceType getPromotionPieceType() {
+	public Constants.PieceType getPromotionPieceType() {
 		switch ((int) ((moveBB >> 12) & 3)) {
 			case 0:
 				return Constants.PieceType.KNIGHT;

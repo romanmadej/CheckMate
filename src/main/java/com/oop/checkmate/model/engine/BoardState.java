@@ -16,8 +16,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
-import com.oop.checkmate.model.Position;
 import com.oop.checkmate.model.Piece;
+import com.oop.checkmate.model.Position;
 
 public class BoardState {
 	Color sideToMove;

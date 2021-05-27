@@ -3,8 +3,8 @@ package com.oop.checkmate.view;
 import static com.oop.checkmate.Constants.SQUARE_SIZE;
 
 import com.oop.checkmate.Constants;
-import com.oop.checkmate.model.Position;
 import com.oop.checkmate.model.Piece;
+import com.oop.checkmate.model.Position;
 
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -23,6 +23,10 @@ public class PieceView extends ImageView {
 
 	public PieceView(Piece piece) {
 		super();
+		this.setPiece(piece);
+	}
+
+	public void setPiece(Piece piece) {
 		this.setImage(images[piece.color.ordinal()][piece.pieceType.ordinal()]);
 		this.setFitWidth(SQUARE_SIZE);
 		this.setFitHeight(SQUARE_SIZE);
