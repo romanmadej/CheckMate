@@ -88,7 +88,7 @@ public class Move {
 		return Position.fromSquareId(id);
 	}
 
-	boolean isPromotion() {
+	public boolean isPromotion() {
 		//all promotion types have 2^3 bit set
 		return ((moveBB >> 15) & 1) != 0;
 	}

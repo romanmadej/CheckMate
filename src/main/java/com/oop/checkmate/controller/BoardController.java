@@ -49,6 +49,31 @@ public class BoardController {
 		}
 	}
 
+	// make sure before calling that every PieceView is aligned in its square
+	private void visualizeMove(Move move) {
+		if (move.isRegularCapture() || (move.isPromotion() && move.isCapture())) {
+			boardView.getChildren().remove(boardView.getPieceView(move.getToPosition()));
+		}
+		if (move.isEpCapture()) {
+			int capturedY = boardState.getSideToMove() == WHITE ? move.getToPosition().y + 1 : move.getToPosition().y - 1;
+			int capturedX = move.getToPosition().x;
+			boardView.getChildren().remove(boardView.getPieceView(new Position(capturedX, capturedY)));
+		}
+		if (move.isKingsideCastling()) {
+			int rookY = boardState.getSideToMove() == WHITE ? 7 : 0;
+			PieceView rookPieceView = boardView.getPieceView(new Position(7, rookY));
+			rookPieceView.setPosition(new Position(5, rookY));
+		}
+		if (move.isQueensideCastling()) {
+			int rookY = boardState.getSideToMove() == WHITE ? 7 : 0;
+			PieceView rookPieceView = boardView.getPieceView(new Position(0, rookY));
+			rookPieceView.setPosition(new Position(3, rookY));
+		}
+		boardState.makeMove(move);
+		boardView.getPieceView(move.getFromPosition()).setPosition(move.getToPosition());
+		boardView.highlightMove(move);
+	}
+
 	private class InputHandler {
 		private Position initialPosition;
 		private Double mouseOffsetX;
@@ -94,46 +119,16 @@ public class BoardController {
 				Position position = new Position(x, y);
 				System.out.println("target: " + position + " (" + centerX + ", " + centerY + ")");
 
+				// very important, has to be called before visualizeMove(...)
+				// we dont want pieceView to collide in getPieceView(...)
+				pieceView.setPosition(initialPosition);
+
 				boardView.resetHighlight();
+				pieceView.setViewOrder(0);
 
 				Optional<Move> move = legalMoves.stream().filter(m -> m.getToPosition().equals(position)).findFirst();
-				if (move.isPresent()) {
+				move.ifPresent(BoardController.this::visualizeMove);
 
-					if (move.get().isRegularCapture()) {
-						boardView.getChildren().remove(pieceView);
-						boardView.getChildren().remove(boardView.getPieceView(position));
-						boardView.getChildren().add(pieceView);
-					}
-					if (move.get().isEpCapture()) {
-						int capturedY = boardState.getSideToMove() == WHITE ? position.y + 1 : position.y - 1;
-						int capturedX = position.x;
-						boardView.getChildren().remove(pieceView);
-						boardView.getChildren().remove(boardView.getPieceView(new Position(capturedX, capturedY)));
-						boardView.getChildren().add(pieceView);
-					}
-					if (move.get().isKingsideCastling()) {
-						int rookFromX = 7;
-						int rookFromY = boardState.getSideToMove() == WHITE ? 7 : 0;
-						PieceView rookPieceView = boardView.getPieceView(new Position(rookFromX, rookFromY));
-						int rookToY = boardState.getSideToMove() == WHITE ? 7 : 0;
-						rookPieceView.setPosition(new Position(5, rookFromY));
-					}
-					if (move.get().isQueensideCastling()) {
-						int rookFromX = 0;
-						int rookFromY = boardState.getSideToMove() == WHITE ? 7 : 0;
-						PieceView rookPieceView = boardView.getPieceView(new Position(rookFromX, rookFromY));
-						int rookToY = boardState.getSideToMove() == WHITE ? 7 : 0;
-						rookPieceView.setPosition(new Position(3, rookFromY));
-					}
-
-					boardState.makeMove(move.get());
-					pieceView.setPosition(position);
-					boardView.highlightMove(move.get());
-				} else {
-					pieceView.setPosition(initialPosition);
-				}
-
-				pieceView.setViewOrder(0);
 				initialPosition = null;
 				mouseOffsetX = mouseOffsetY = null;
 				legalMoves = null;
