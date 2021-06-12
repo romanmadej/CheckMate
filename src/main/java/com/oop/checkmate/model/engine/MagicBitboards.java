@@ -64,7 +64,7 @@ public class MagicBitboards {
             }
     };
 
-    static long[][][] attacks = new long[2][64][4096];
+    static long[][][] attacks = new long[2][64][];
 
     static long[][] relevantOccupancy = new long[2][64];
     static final long[] edges = {RANK1BB, RANK8BB, FileABB, FileHBB};
@@ -122,12 +122,12 @@ public class MagicBitboards {
                 relevantOccupancy[pieceType][sq] = relevantOccupancyBB;
             }
         }
-
         //initialize attacks array
         for (int pieceType = 0; pieceType < 2; pieceType++) {
             PieceType pt = getPieceType(pieceType);
             for (int sq = 0; sq < SQUARE_N; sq++) {
                 int subsets = 1 << shift[pieceType][sq];
+                attacks[pieceType][sq] = new long[subsets];
                 for (int mask = 0; mask < subsets; mask++) {
                     long occ = getBlockers(mask, relevantOccupancy[pieceType][sq]);
                     long attacksBB = slidingPseudoAttacks(pt, sq, occ, occ);
