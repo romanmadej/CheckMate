@@ -9,51 +9,101 @@ import com.oop.checkmate.model.Piece;
 
 
 public class PositionAnalysis {
-    public BoardState CurrentPosition;
 
-    public PositionAnalysis(BoardState board){
-        CurrentPosition = new BoardState(board.generateFen());
-    }
-
-
-    public Move Analysis(BoardState boardState){
+	public Move Analysis(BoardState boardState, int depth, Constants.Color maximizingPlayer) {
         List <Move> Candidates = boardState.generateLegalMoves();
         Move BestMove = null;
-		double eval = -2010;
-        for(Move move :Candidates){
-            boardState.makeMove(move);
-			double res = -Analyse(0, boardState);
-            if(res > eval){
-                System.out.println(res);
-                eval = res;
-                BestMove = move;
-            }
-            boardState.undoLastMove();
-        }
-        return BestMove;
+		double eval;
+		double alpha = -999999;
+		double beta = 999999;
+		if (maximizingPlayer == boardState.sideToMove) {
+			eval = -99999;
+			for (Move move : Candidates) {
+				boardState.makeMove(move);
+				double current = Analyse(boardState, depth - 1, alpha, beta, maximizingPlayer);
+				boardState.undoLastMove();
+				if (alpha < current) {
+					alpha = current;
+				}
+				if (beta <= alpha) {
+					break;
+				}
+				if (current > eval) {
+					eval = current;
+					BestMove = move;
+				}
+			}
+			return BestMove;
+		} else {
+			eval = 999999;
+			for (Move move : Candidates) {
+				boardState.makeMove(move);
+				double current = Analyse(boardState, depth - 1, alpha, beta, maximizingPlayer);
+				boardState.undoLastMove();
+				if (current < eval) {
+					eval = current;
+					BestMove = move;
+				}
+				if (beta > current) {
+					beta = current;
+				}
+				if (beta <= alpha) {
+					break;
+				}
+			}
+			return BestMove;
+		}
     }
 
-	public double Analyse(int depth, BoardState boardState) {
-		double eval = -2010;
-        if(depth == 2){
-            return Evaluation(boardState);
-        }
-        List <Move> Candidates = boardState.generateLegalMoves();
-        if(Candidates.isEmpty()){
-			return -2000;
-        }
-        for(Move move : Candidates){
-            boardState.makeMove(move);
-			double res = -Analyse(depth + 1, boardState);
-            if(res >= eval){
-                eval = res;
-            }
-            boardState.undoLastMove();
-        }
-        return eval;
+	public double Analyse(BoardState boardState, int depth, double alpha, double beta,
+			Constants.Color maximizingPlayer) {
+
+		List<Move> Candidates = boardState.generateLegalMoves();
+		if (depth == 0 || Candidates.isEmpty()) {
+			return Evaluation(boardState, maximizingPlayer);
+		}
+		Move BestMove = null;
+		double eval;
+		if (maximizingPlayer == boardState.sideToMove) {
+			eval = -99999;
+			for (Move move : Candidates) {
+				boardState.makeMove(move);
+				double current = Analyse(boardState, depth - 1, alpha, beta, maximizingPlayer);
+				boardState.undoLastMove();
+				if (current > eval) {
+					eval = current;
+					BestMove = move;
+				}
+				if (alpha < current) {
+					alpha = current;
+				}
+				if (beta <= alpha) {
+					break;
+				}
+			}
+			return eval;
+		} else {
+			eval = 999999;
+			for (Move move : Candidates) {
+				boardState.makeMove(move);
+				double current = Analyse(boardState, depth - 1, alpha, beta, maximizingPlayer);
+				boardState.undoLastMove();
+				if (current < eval) {
+					eval = current;
+					BestMove = move;
+				}
+				if (beta > current) {
+					beta = current;
+				}
+				if (beta <= alpha) {
+					break;
+				}
+			}
+			return eval;
+		}
 	}
 
-	public double Evaluation(BoardState boardState) {
+	public double Evaluation(BoardState boardState, Constants.Color maximizingPlayer) {
 		boardState.generateLegalMoves();
 		boolean checkmate = false;
 		List<Move> legal = boardState.generateLegalMoves();
@@ -70,7 +120,7 @@ public class PositionAnalysis {
 			if (piece == Piece.NO_PIECE) {
 				continue;
 			}
-			if (piece.color == boardState.sideToMove) {
+			if (piece.color == maximizingPlayer) {
 				player += PieceValues(piece, i);
 			} else {
 				opponent += PieceValues(piece, i);
@@ -123,7 +173,4 @@ public class PositionAnalysis {
 		return 0;
     }
 
-	double PositionValues(int position, Constants.PieceType type) {
-		return 0;
-	}
 }
