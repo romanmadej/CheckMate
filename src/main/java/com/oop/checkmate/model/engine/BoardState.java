@@ -10,6 +10,7 @@ import static com.oop.checkmate.model.engine.Bitboards.*;
 import static com.oop.checkmate.model.engine.EngineConstants.*;
 import static com.oop.checkmate.model.engine.EngineConstants.MoveType.*;
 import static com.oop.checkmate.model.engine.EngineConstants.Square.*;
+import static com.oop.checkmate.model.engine.MagicBitboards.pseudoMoves;
 
 import java.util.*;
 
@@ -576,8 +577,8 @@ public class BoardState {
 		return pawnAttacks(WHITE, square) & pieces(BLACK.id, PAWN)
 				| pawnAttacks(BLACK, square) & pieces(WHITE.id, PAWN) | pseudoAttacks(KING, square) & pieces(KING)
 				| pseudoAttacks(KNIGHT, square) & pieces(KNIGHT)
-				| slidingPseudoAttacks(ROOK, square, occupiedBB, occupiedBB) & (pieces(ROOK) | pieces(QUEEN))
-				| slidingPseudoAttacks(BISHOP, square, occupiedBB, occupiedBB) & (pieces(BISHOP) | pieces(QUEEN));
+				| pseudoMoves(ROOK, square, occupiedBB) & (pieces(ROOK) | pieces(QUEEN))
+				| pseudoMoves(BISHOP, square, occupiedBB) & (pieces(BISHOP) | pieces(QUEEN));
 	}
 
 	// returns a bitboard containing pieces of provided color that if removed expose

@@ -4,8 +4,7 @@ import static com.oop.checkmate.Constants.Color.BLACK;
 import static com.oop.checkmate.Constants.Color.WHITE;
 import static com.oop.checkmate.Constants.PieceType.KING;
 import static com.oop.checkmate.Constants.PieceType.QUEEN;
-import static com.oop.checkmate.model.engine.BitboardUtils.get_lsb;
-import static com.oop.checkmate.model.engine.BitboardUtils.squareBB;
+import static com.oop.checkmate.model.engine.BitboardUtils.*;
 import static com.oop.checkmate.model.engine.Bitboards.pseudoMovesBitboard;
 import static com.oop.checkmate.model.engine.EngineConstants.MoveType.*;
 import static com.oop.checkmate.model.engine.EngineConstants.Square.*;
@@ -24,9 +23,9 @@ public class MoveGeneratingTest {
 		long opponentsBB = 0b1111111111111111000000000000000000000000000000000000000000000000L;
 
 		System.out.println("white pieces:");
-		BitboardUtils.printBB(alliesBB);
+		printBB(alliesBB);
 		System.out.println("black pieces:");
-		BitboardUtils.printBB(opponentsBB);
+		printBB(opponentsBB);
 	}
 
 	@Test
@@ -38,14 +37,13 @@ public class MoveGeneratingTest {
 				Constants.PieceType.QUEEN, EngineConstants.Square.F5.id, alliesBB, opponentsBB);
 
 		System.out.println("white queen moves from F5:");
-		BitboardUtils.printBB(movesBB);
+		printBB(movesBB);
 
 		TestCase.assertEquals(2641485286422881314L, movesBB);
 	}
 
 	@Test
 	public void BitboardUtilsTest() {
-
 		TestCase.assertEquals(0, get_lsb(0x1));
 		TestCase.assertEquals(63, get_lsb(0x8000000000000000L));
 

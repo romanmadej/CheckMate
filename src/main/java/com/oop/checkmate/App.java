@@ -10,7 +10,8 @@ import javafx.stage.Stage;
 
 public class App extends Application {
 	@Override
-	public void start(Stage stage) {
+	public void start(Stage stage) throws ClassNotFoundException {
+		Class.forName("com.oop.checkmate.model.engine.MagicBitboards");
 		int size = 8 * SQUARE_SIZE;
 		BoardController boardController = new BoardController(true);
 		Scene scene = new Scene(boardController.getView(), size, size);

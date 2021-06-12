@@ -7,6 +7,7 @@ import static com.oop.checkmate.model.engine.BitboardUtils.*;
 import static com.oop.checkmate.model.engine.EngineConstants.*;
 import static com.oop.checkmate.model.engine.EngineConstants.MoveType.*;
 import static com.oop.checkmate.model.engine.EngineConstants.Square.A1;
+import static com.oop.checkmate.model.engine.MagicBitboards.pseudoMoves;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,15 +15,11 @@ import java.util.List;
 import com.oop.checkmate.Constants;
 import com.oop.checkmate.model.Piece;
 
-/*
-Bitboard constants precalculated
- */
 
 class Bitboards {
 	private Bitboards() {
 	}
 
-	// have to be 0 initialized
 	private static final long[][] pawnAttacks = new long[COLOR_N][SQUARE_N];
 	private static final long[][] pawnPush = new long[COLOR_N][SQUARE_N];
 	private static final long[][] pseudoAttacks = new long[PIECE_TYPE_N][SQUARE_N];
@@ -30,7 +27,6 @@ class Bitboards {
 
 	static {
 		init();
-
 	}
 
 	private static void init() {
@@ -73,7 +69,7 @@ class Bitboards {
 		}
 	}
 
-	// works under assumption that QUIET and CAPTURE are only valid MoveTypes
+	// works under assumption that QUIET and CAPTURE are the only passed MoveTypes
 	static long pseudoMovesBitboard(MoveType moveType, Constants.Color color, Constants.PieceType pieceType,
 									int squareId, long alliesBB, long opponentsBB) {
 		if (pieceType != ROOK && pieceType != BISHOP && pieceType != QUEEN) {
@@ -86,14 +82,13 @@ class Bitboards {
 			return pseudoAttacks[pieceType.id][squareId]
 					& (moveType == QUIET ? ~(alliesBB | opponentsBB) : opponentsBB);
 		}
-		if (pieceType == QUEEN)
-			return slidingPseudoAttacks(ROOK, squareId, alliesBB | opponentsBB, opponentsBB)
-					& (moveType == QUIET ? ~(alliesBB | opponentsBB) : opponentsBB)
-					| slidingPseudoAttacks(BISHOP, squareId, alliesBB | opponentsBB, opponentsBB)
-					& (moveType == QUIET ? ~(alliesBB | opponentsBB) : opponentsBB);
 
-		return slidingPseudoAttacks(pieceType, squareId, alliesBB | opponentsBB, opponentsBB)
-				& (moveType == QUIET ? ~(alliesBB | opponentsBB) : opponentsBB);
+		long occ = alliesBB | opponentsBB;
+		long mask = (moveType == QUIET ? ~occ : opponentsBB);
+		if (pieceType == QUEEN)
+			return mask & (pseudoMoves(ROOK, squareId, occ) | pseudoMoves(BISHOP, squareId, occ));
+
+		return mask & pseudoMoves(pieceType, squareId, occ);
 	}
 
 	//consider moving to BoardState and changing to non-static
