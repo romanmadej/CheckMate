@@ -12,6 +12,7 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
+import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
@@ -19,6 +20,7 @@ import javafx.scene.control.ColorPicker;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
+import javafx.stage.Stage;
 import javafx.util.StringConverter;
 
 public class OptionsController extends BasicController {
@@ -32,6 +34,8 @@ public class OptionsController extends BasicController {
 	private Button saveChangesButton;
 	@FXML
 	private Button restoreButton;
+	@FXML
+	private Button doneButton;
 
 	private final SimpleObjectProperty<UserPreferences.PieceSet> currentPieceSet = new SimpleObjectProperty<>();
 	private final SimpleObjectProperty<Color> currentLightTileColor = new SimpleObjectProperty<>();
@@ -140,5 +144,16 @@ public class OptionsController extends BasicController {
 		lightColorPicker.setValue(currentLightTileColor.getValue());
 		lightColorPicker.getCustomColors().set(0, currentDarkTileColor.getValue());
 		darkColorPicker.setValue(currentDarkTileColor.getValue());
+	}
+
+	public void doneButtonOnClicked(MouseEvent mouseEvent) {
+		if (mouseEvent.getSource() != doneButton) {
+			throw new UnsupportedOperationException("Incorrect button assigned");
+		}
+		if (mouseEvent.getButton() != MouseButton.PRIMARY) {
+			return;
+		}
+		Stage stage = (Stage) ((Node) mouseEvent.getSource()).getScene().getWindow();
+		stage.close();
 	}
 }

@@ -7,6 +7,7 @@ import java.io.IOException;
 import com.oop.checkmate.view.BoardView;
 
 import javafx.application.Application;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
@@ -19,11 +20,10 @@ public class App extends Application {
 		Class.forName("com.oop.checkmate.UserPreferences");
 		Class.forName("com.oop.checkmate.model.engine.MagicBitboards");
 
-		Scene scene = Navigator.createNamedScene("/MenuView.fxml", null);
+		Parent parent = Navigator.loadView("/MenuView.fxml", null);
+		stage.setScene(new Scene(parent, 8 * SQUARE_SIZE, 6 * SQUARE_SIZE));
+		stage.sizeToScene();
 		stage.setTitle("CheckMate");
-		stage.setScene(scene);
-		stage.setWidth(8 * SQUARE_SIZE);
-		stage.setHeight(6 * SQUARE_SIZE);
 		stage.setResizable(false);
 		stage.addEventFilter(WindowEvent.WINDOW_CLOSE_REQUEST, this::closeWindowEvent);
 		stage.show();
@@ -42,9 +42,10 @@ public class App extends Application {
 		confirmationAlert.showAndWait();
 		if (confirmationAlert.getResult() == ButtonType.YES) {
 			try {
-				Navigator.of(stage).setNamed("/MenuView.fxml", null);
-				stage.setHeight(6 * SQUARE_SIZE);
+				Parent parent = Navigator.loadView("/MenuView.fxml", null);
 				stage.setY(stage.getY() + SQUARE_SIZE);
+				stage.setScene(new Scene(parent, 8 * SQUARE_SIZE, 6 * SQUARE_SIZE));
+				stage.sizeToScene();
 			} catch (Exception e) {
 				throw new RuntimeException(e);
 			}

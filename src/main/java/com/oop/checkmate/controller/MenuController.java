@@ -6,14 +6,16 @@ import java.io.IOException;
 import java.util.Map;
 
 import com.oop.checkmate.Navigator;
-import com.oop.checkmate.view.BoardView;
 
 import javafx.fxml.FXML;
 import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 public class MenuController extends BasicController {
@@ -31,17 +33,6 @@ public class MenuController extends BasicController {
 	@Override
 	public void initialize(Map<String, Object> args) {
 		logoImageView.setFitWidth(SQUARE_SIZE * 4);
-		playHotseatButton.prefWidthProperty().bind(playComputerButton.widthProperty());
-		optionsButton.prefWidthProperty().bind(playComputerButton.widthProperty());
-		exitButton.prefWidthProperty().bind(playComputerButton.widthProperty());
-	}
-
-	private void navigateToBoardView(Stage stage, BoardView boardView) {
-		Navigator.of(stage).set(boardView);
-		double titleBarHeight = stage.getHeight() - stage.getScene().getHeight();
-		stage.setHeight(SQUARE_SIZE * 8 + titleBarHeight);
-		stage.setY(stage.getY() - SQUARE_SIZE);
-		stage.setResizable(false);
 	}
 
 	@FXML
@@ -54,7 +45,9 @@ public class MenuController extends BasicController {
 		}
 		Stage stage = (Stage) ((Node) mouseEvent.getSource()).getScene().getWindow();
 		BoardController boardController = new BoardController(false);
-		navigateToBoardView(stage, (BoardView) boardController.getView());
+		stage.setY(stage.getY() - SQUARE_SIZE);
+		stage.setScene(new Scene(boardController.getView(), 8 * SQUARE_SIZE, 8 * SQUARE_SIZE));
+		stage.sizeToScene();
 	}
 
 	@FXML
@@ -67,7 +60,9 @@ public class MenuController extends BasicController {
 		}
 		Stage stage = (Stage) ((Node) mouseEvent.getSource()).getScene().getWindow();
 		BoardController boardController = new BoardController(true);
-		navigateToBoardView(stage, (BoardView) boardController.getView());
+		stage.setY(stage.getY() - SQUARE_SIZE);
+		stage.setScene(new Scene(boardController.getView(), 8 * SQUARE_SIZE, 8 * SQUARE_SIZE));
+		stage.sizeToScene();
 	}
 
 	@FXML
@@ -79,7 +74,14 @@ public class MenuController extends BasicController {
 			return;
 		}
 		Stage stage = (Stage) ((Node) mouseEvent.getSource()).getScene().getWindow();
-		Navigator.of(stage).pushNamed("/OptionsView.fxml", null);
+		Parent parent = Navigator.loadView("/OptionsView.fxml", null);
+		Stage optionsStage = new Stage();
+		optionsStage.setScene(new Scene(parent, 6 * SQUARE_SIZE, 4 * SQUARE_SIZE));
+		optionsStage.sizeToScene();
+		optionsStage.setTitle("Options");
+		optionsStage.setResizable(false);
+		optionsStage.initModality(Modality.APPLICATION_MODAL);
+		optionsStage.show();
 	}
 
 	public void exitButtonOnClicked(MouseEvent mouseEvent) {

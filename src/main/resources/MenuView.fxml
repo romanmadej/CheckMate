@@ -14,15 +14,15 @@
             <Image url="logo.png"/>
         </ImageView>
         <Region prefHeight="10"/>
-        <Button fx:id="playHotseatButton" text="Play hotseat"
+        <Button fx:id="playHotseatButton" text="Play hotseat" prefWidth="165"
                 onMouseClicked="#playHotseatButtonOnClicked"/>
-        <Button fx:id="playComputerButton" text="Play against the Computer"
+        <Button fx:id="playComputerButton" text="Play against the Computer" prefWidth="165"
                 onMouseClicked="#playComputerButtonOnClicked"/>
         <Separator maxWidth="128"/>
-        <Button fx:id="optionsButton" text="Options"
+        <Button fx:id="optionsButton" text="Options" prefWidth="165"
                 onMouseClicked="#optionsButtonOnClicked"/>
         <Separator maxWidth="128"/>
-        <Button fx:id="exitButton" text="Exit"
+        <Button fx:id="exitButton" text="Exit" prefWidth="165"
                 onMouseClicked="#exitButtonOnClicked"/>
     </VBox>
 </HBox>
