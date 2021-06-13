@@ -1,13 +1,7 @@
 package com.oop.checkmate.model.engine;
 
-import static com.oop.checkmate.Constants.Color;
-import static com.oop.checkmate.Constants.Color.BLACK;
-import static com.oop.checkmate.Constants.Color.WHITE;
-import static com.oop.checkmate.Constants.PieceType.*;
 import static com.oop.checkmate.model.engine.BitboardUtils.squareBB;
 import static com.oop.checkmate.model.engine.EngineConstants.Square.*;
-
-import com.oop.checkmate.Constants;
 
 public final class EngineConstants {
 	private EngineConstants() {
@@ -42,7 +36,7 @@ public final class EngineConstants {
 			5, 5, 5, 5, 5, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0 };
 	final static double[] bPawnValue = new double[] { 0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 5, 5, 5, 5, 5, 5, 1, 1, 2, 3, 3, 2,
 			1, 1, 0.5, 0.5, 1, 2.5, 2.5, 1, 0.5, 0.5, 0.5, -0.5, -1, 0, 0, -1, -0.5, 0.5, 0.5, 1, 1, -2, -2, 1, 1, 0.5,
-			0, 0, 0, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+			0, 0, 0, -2, -2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 	final static double[] wKnightValue = new double[] { -5, -4, -3, -3, -3, -3, -4, -5, -4, -2, 0, 0, 0, 0, -2, -4, -3,
 			0, 1, 1.5, 1.5, 1, 0, -3, -3, 0.5, 1.5, 2, 2, 1.5, 0.5, -3, -3, 0.5, 1.5, 2, 2, 1.5, 0.5, -3, -3, 0, 1, 1.5,
 			1.5, 1, 0, -3, -4, -2, 0, 0, 0, 0, -2, -4, -5, -4, -3, -3, -3, -3, -4, -5 };

@@ -25,7 +25,7 @@ public class PositionAnalysis {
 				if (alpha < current) {
 					alpha = current;
 				}
-				if (beta <= alpha) {
+				if (beta < alpha) {
 					break;
 				}
 				if (current > eval) {
@@ -33,6 +33,7 @@ public class PositionAnalysis {
 					BestMove = move;
 				}
 			}
+			System.out.println(eval);
 			return BestMove;
 		} else {
 			eval = 999999;
@@ -47,7 +48,7 @@ public class PositionAnalysis {
 				if (beta > current) {
 					beta = current;
 				}
-				if (beta <= alpha) {
+				if (beta < alpha) {
 					break;
 				}
 			}
@@ -77,7 +78,7 @@ public class PositionAnalysis {
 				if (alpha < current) {
 					alpha = current;
 				}
-				if (beta <= alpha) {
+				if (beta < alpha) {
 					break;
 				}
 			}
@@ -95,7 +96,7 @@ public class PositionAnalysis {
 				if (beta > current) {
 					beta = current;
 				}
-				if (beta <= alpha) {
+				if (beta < alpha) {
 					break;
 				}
 			}
@@ -111,7 +112,11 @@ public class PositionAnalysis {
 			checkmate = true;
 		}
 		if (checkmate) {
-			return -2000;
+			if (boardState.getSideToMove() == maximizingPlayer) {
+				return -9000;
+			} else {
+				return 9000;
+			}
 		}
 		double player = 0;
 		double opponent = 0;
