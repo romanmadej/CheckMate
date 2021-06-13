@@ -26,7 +26,6 @@ public final class UserPreferences {
 	}
 
 	public static PieceSet getPieceSet() {
-		String dbg = preferences.get(Keys.PIECE_SET.name(),null);
 		return PieceSet.valueOf(preferences.get(Keys.PIECE_SET.name(), PieceSet.values()[0].name()));
 	}
 
