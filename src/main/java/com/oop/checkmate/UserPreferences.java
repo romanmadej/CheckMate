@@ -15,7 +15,7 @@ public final class UserPreferences {
 	}
 
 	public enum PieceSet {
-		MERIDA
+		MERIDA, CASES
 	}
 
 	static {
