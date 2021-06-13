@@ -2,7 +2,6 @@ package com.oop.checkmate.controller;
 
 import static com.oop.checkmate.Constants.SQUARE_SIZE;
 
-import java.io.IOException;
 import java.util.Map;
 
 import com.oop.checkmate.Navigator;
@@ -15,7 +14,6 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
-import jdk.jshell.spi.ExecutionControl;
 
 public class MenuController extends BasicController {
 	@FXML
