@@ -3,6 +3,7 @@ package com.oop.checkmate.view;
 import static com.oop.checkmate.Constants.SQUARE_SIZE;
 
 import com.oop.checkmate.Constants;
+import com.oop.checkmate.UserPreferences;
 import com.oop.checkmate.model.Piece;
 import com.oop.checkmate.model.Position;
 
@@ -10,13 +11,17 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 
 public class PieceView extends ImageView {
-	private static final Image[][] images = new Image[2][6];
+	private static final Image[][][] cachedImages = new Image[UserPreferences.PieceSet.values().length][2][6];
 
 	static {
-		for (Constants.PieceType pieceType : Constants.PieceType.values()) {
-			for (Constants.Color color : Constants.Color.values()) {
-				images[color.ordinal()][pieceType.ordinal()] = new Image(
-						"/" + color.name().toLowerCase() + "_" + pieceType.name().toLowerCase() + ".png");
+		for (UserPreferences.PieceSet pieceSet : UserPreferences.PieceSet.values()) {
+			for (Constants.PieceType pieceType : Constants.PieceType.values()) {
+				for (Constants.Color color : Constants.Color.values()) {
+					String url = String
+							.format("/piecesets/%s/%s_%s.png", pieceSet.name(), color.name(), pieceType.name())
+							.toLowerCase();
+					cachedImages[pieceSet.ordinal()][color.ordinal()][pieceType.ordinal()] = new Image(url);
+				}
 			}
 		}
 	}
@@ -27,7 +32,9 @@ public class PieceView extends ImageView {
 	}
 
 	public void setPiece(Piece piece) {
-		this.setImage(images[piece.color.ordinal()][piece.pieceType.ordinal()]);
+		Image image = cachedImages[UserPreferences.getPieceSet().ordinal()][piece.color.ordinal()][piece.pieceType
+				.ordinal()];
+		this.setImage(image);
 		this.setFitWidth(SQUARE_SIZE);
 		this.setFitHeight(SQUARE_SIZE);
 	}

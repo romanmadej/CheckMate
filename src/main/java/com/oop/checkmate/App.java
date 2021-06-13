@@ -16,6 +16,7 @@ import javafx.stage.WindowEvent;
 public class App extends Application {
 	@Override
 	public void start(Stage stage) throws ClassNotFoundException, IOException {
+		Class.forName("com.oop.checkmate.UserPreferences");
 		Class.forName("com.oop.checkmate.model.engine.MagicBitboards");
 
 		Scene scene = Navigator.createNamedScene("/MenuView.fxml", null);

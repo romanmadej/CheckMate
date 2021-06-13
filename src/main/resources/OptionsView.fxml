@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<HBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.oop.checkmate.controller.OptionsController"
+      alignment="CENTER" spacing="10">
+    <VBox alignment="CENTER" spacing="10">
+        <HBox alignment="CENTER_RIGHT" spacing="10">
+            <Label text="Piece set:"/>
+            <ChoiceBox fx:id="pieceSetChoiceBox"/>
+        </HBox>
+        <HBox alignment="CENTER_RIGHT" spacing="10">
+            <Label text="Light tile color:"/>
+            <ColorPicker fx:id="lightColorPicker"/>
+        </HBox>
+        <HBox alignment="CENTER_RIGHT" spacing="10">
+            <Label text="Dark tile color:"/>
+            <ColorPicker fx:id="darkColorPicker"/>
+        </HBox>
+        <Separator maxWidth="128"/>
+        <HBox alignment="CENTER" spacing="10">
+            <Button fx:id="restoreButton" text="Restore" onMouseClicked="#restoreButtonOnClicked"/>
+            <Button fx:id="saveChangesButton" text="Save changes" onMouseClicked="#saveChangesButtonOnClicked"/>
+        </HBox>
+    </VBox>
+</HBox>

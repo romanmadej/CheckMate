@@ -2,11 +2,11 @@ package com.oop.checkmate.view;
 
 import static com.oop.checkmate.Constants.SQUARE_SIZE;
 
-import java.util.List;
 import java.util.NoSuchElementException;
 
-import com.oop.checkmate.model.Position;
+import com.oop.checkmate.UserPreferences;
 import com.oop.checkmate.model.Piece;
+import com.oop.checkmate.model.Position;
 import com.oop.checkmate.model.engine.Move;
 
 import javafx.scene.Group;
@@ -19,8 +19,8 @@ public class BoardView extends Group {
 	private final Rectangle[][] overlayTiles = new Rectangle[8][8];
 
 	public BoardView() {
-		final Color light = Color.valueOf("#FFFFFF");
-		final Color dark = Color.valueOf("#E0E1E5");
+		final Color light = UserPreferences.getLightTileColor();
+		final Color dark = UserPreferences.getDarkTileColor();
 
 		GridPane board = new GridPane();
 		for (int y = 0; y < 8; ++y) {

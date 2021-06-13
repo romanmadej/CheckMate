@@ -2,6 +2,7 @@ package com.oop.checkmate.controller;
 
 import static com.oop.checkmate.Constants.SQUARE_SIZE;
 
+import java.io.IOException;
 import java.util.Map;
 
 import com.oop.checkmate.Navigator;
@@ -23,12 +24,15 @@ public class MenuController extends BasicController {
 	@FXML
 	private Button playComputerButton;
 	@FXML
+	private Button optionsButton;
+	@FXML
 	private Button exitButton;
 
 	@Override
 	public void initialize(Map<String, Object> args) {
 		logoImageView.setFitWidth(SQUARE_SIZE * 4);
 		playHotseatButton.prefWidthProperty().bind(playComputerButton.widthProperty());
+		optionsButton.prefWidthProperty().bind(playComputerButton.widthProperty());
 		exitButton.prefWidthProperty().bind(playComputerButton.widthProperty());
 	}
 
@@ -64,6 +68,18 @@ public class MenuController extends BasicController {
 		Stage stage = (Stage) ((Node) mouseEvent.getSource()).getScene().getWindow();
 		BoardController boardController = new BoardController(true);
 		navigateToBoardView(stage, (BoardView) boardController.getView());
+	}
+
+	@FXML
+	private void optionsButtonOnClicked(MouseEvent mouseEvent) throws IOException {
+		if (mouseEvent.getSource() != optionsButton) {
+			throw new UnsupportedOperationException("Incorrect button assigned");
+		}
+		if (mouseEvent.getButton() != MouseButton.PRIMARY) {
+			return;
+		}
+		Stage stage = (Stage) ((Node) mouseEvent.getSource()).getScene().getWindow();
+		Navigator.of(stage).pushNamed("/OptionsView.fxml", null);
 	}
 
 	public void exitButtonOnClicked(MouseEvent mouseEvent) {

@@ -9,7 +9,7 @@
       xmlns:fx="http://javafx.com/fxml"
       fx:controller="com.oop.checkmate.controller.MenuController"
       alignment="CENTER" spacing="10">
-    <VBox alignment="CENTER" spacing="10" style="-fx-padding: 10 10 10 10;">
+    <VBox alignment="CENTER" spacing="10">
         <ImageView fx:id="logoImageView" preserveRatio="true">
             <Image url="logo.png"/>
         </ImageView>
@@ -18,6 +18,9 @@
                 onMouseClicked="#playHotseatButtonOnClicked"/>
         <Button fx:id="playComputerButton" text="Play against the Computer"
                 onMouseClicked="#playComputerButtonOnClicked"/>
+        <Separator maxWidth="128"/>
+        <Button fx:id="optionsButton" text="Options"
+                onMouseClicked="#optionsButtonOnClicked"/>
         <Separator maxWidth="128"/>
         <Button fx:id="exitButton" text="Exit"
                 onMouseClicked="#exitButtonOnClicked"/>
