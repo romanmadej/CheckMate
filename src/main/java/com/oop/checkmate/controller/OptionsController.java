@@ -124,7 +124,7 @@ public class OptionsController extends BasicController {
 		UserPreferences.setLightTileColor(currentLightTileColor.getValue());
 		UserPreferences.setDarkTileColor(currentDarkTileColor.getValue());
 		Alert alert = new Alert(Alert.AlertType.INFORMATION);
-		alert.setContentText("Colors have been set successfully.");
+		alert.setContentText("Your changes have been saved.");
 		alert.showAndWait();
 	}
 
