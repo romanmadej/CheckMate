@@ -97,7 +97,7 @@ public class BoardController {
 
 	private void makeAIMove() {
 		boardView.resetHighlight();
-		makeMove(new PositionAnalysis(boardState).Analysis(boardState));
+		makeMove(new PositionAnalysis().Analysis(boardState, 3, boardState.getSideToMove()));
 	}
 
 	private class InputHandler {
