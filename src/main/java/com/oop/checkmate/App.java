@@ -9,8 +9,6 @@ import com.oop.checkmate.view.BoardView;
 import javafx.application.Application;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
-import javafx.scene.control.ButtonType;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
@@ -35,20 +33,10 @@ public class App extends Application {
 			return;
 		}
 		event.consume();
-
-		Alert confirmationAlert = new Alert(Alert.AlertType.CONFIRMATION,
-				"Quit to the main menu? Your game will be lost.", ButtonType.YES, ButtonType.NO);
-
-		confirmationAlert.showAndWait();
-		if (confirmationAlert.getResult() == ButtonType.YES) {
-			try {
-				Parent parent = Navigator.loadView("/MenuView.fxml", null);
-				stage.setY(stage.getY() + SQUARE_SIZE);
-				stage.setScene(new Scene(parent, 8 * SQUARE_SIZE, 6 * SQUARE_SIZE));
-				stage.sizeToScene();
-			} catch (Exception e) {
-				throw new RuntimeException(e);
-			}
+		try {
+			Navigator.navigateToMenu(stage);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
 		}
 	}
 

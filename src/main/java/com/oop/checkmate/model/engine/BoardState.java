@@ -31,13 +31,13 @@ public class BoardState {
 	long checkers; // opposing color pieces giving check
 	static final List<Move> EMPTY_LIST = new ArrayList<>();
 
-	static class StateInfo {
-		int epSquare;
-		byte castlingRights;
-		long checkers;
-		Move prevMove;
-		Piece prevCaptured;
-		StateInfo prevSt;
+	public static class StateInfo {
+		final int epSquare;
+		final byte castlingRights;
+		final long checkers;
+		final Move prevMove;
+		final Piece prevCaptured;
+		final StateInfo prevSt;
 
 		StateInfo(int epSquare, byte castlingRights, long checkers, Move prevMove, Piece prevCaptured, StateInfo prevSt) {
 			this.epSquare = epSquare;
@@ -47,6 +47,18 @@ public class BoardState {
 			this.prevCaptured = prevCaptured;
 			this.prevSt = prevSt;
 		}
+
+		public Move getLastMove() {
+			return prevMove;
+		}
+
+		public boolean isCheck() {
+			return checkers != 0;
+		}
+	}
+
+	protected StateInfo toStateInfo() {
+		return new StateInfo(epSquare, castlingRights, checkers, lastMove, capturedPiece, prev);
 	}
 
 	// starting position constructor
@@ -309,7 +321,7 @@ public class BoardState {
 
 
 	public void makeMove(Move move) {
-		prev = new StateInfo(epSquare, castlingRights, checkers, lastMove, capturedPiece, prev);
+		prev = this.toStateInfo();
 		lastMove = move;
 
 		int from = move.getFrom();

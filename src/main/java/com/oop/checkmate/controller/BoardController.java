@@ -8,6 +8,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import com.oop.checkmate.Constants;
+import com.oop.checkmate.model.BoardModel;
 import com.oop.checkmate.model.Piece;
 import com.oop.checkmate.model.Position;
 import com.oop.checkmate.model.engine.BoardState;
@@ -19,32 +20,50 @@ import com.oop.checkmate.view.PromotionDialog;
 
 import javafx.event.EventHandler;
 import javafx.scene.Cursor;
-import javafx.scene.Parent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 
 public class BoardController {
 	private final BoardView boardView;
 
-	public Parent getView() {
+	private final boolean againstAI;
+
+	public BoardView getView() {
 		return boardView;
 	}
 
-	private final BoardState boardState;
+	public BoardModel getModel() {
+		return boardModel;
+	}
 
-	private final boolean againstAI;
+	private final BoardModel boardModel;
 
 	public BoardController(boolean againstAI) {
 		this.boardView = new BoardView();
-		this.boardState = new BoardState();
+		this.boardModel = new BoardModel();
 		this.againstAI = againstAI;
+		draw(boardModel);
+	}
 
+	public void selectState(int index) {
+		boardModel.selectState(index);
+		draw(boardModel);
+		boardView.resetHighlight();
+
+		Move move = boardModel.getLastMove();
+		if (move != null) {
+			boardView.highlightDoneMove(move);
+			boardModel.getCheckedKing().ifPresent(boardView::highlightWarning);
+		}
+	}
+
+	private void draw(BoardState state) {
+		boardView.getChildren().removeIf(node -> node instanceof PieceView);
 		InputHandler inputHandler = new InputHandler();
-
 		for (int y = 0; y < 8; ++y) {
 			for (int x = 0; x < 8; ++x) {
 				Position position = new Position(x, y);
-				Piece piece = boardState.getPiece(position);
+				Piece piece = state.getPiece(position);
 				if (piece != Piece.NO_PIECE) {
 					PieceView pieceView = boardView.createPieceView(piece, position);
 
@@ -68,17 +87,17 @@ public class BoardController {
 			boardView.getChildren().remove(boardView.getPieceView(move.getToPosition()));
 		}
 		if (move.isEpCapture()) {
-			int capturedY = boardState.getSideToMove() == WHITE ? move.getToPosition().y + 1 : move.getToPosition().y - 1;
+			int capturedY = boardModel.getSideToMove() == WHITE ? move.getToPosition().y + 1 : move.getToPosition().y - 1;
 			int capturedX = move.getToPosition().x;
 			boardView.getChildren().remove(boardView.getPieceView(new Position(capturedX, capturedY)));
 		}
 		if (move.isKingsideCastling()) {
-			int rookY = boardState.getSideToMove() == WHITE ? 7 : 0;
+			int rookY = boardModel.getSideToMove() == WHITE ? 7 : 0;
 			PieceView rookPieceView = boardView.getPieceView(new Position(7, rookY));
 			rookPieceView.setPosition(new Position(5, rookY));
 		}
 		if (move.isQueensideCastling()) {
-			int rookY = boardState.getSideToMove() == WHITE ? 7 : 0;
+			int rookY = boardModel.getSideToMove() == WHITE ? 7 : 0;
 			PieceView rookPieceView = boardView.getPieceView(new Position(0, rookY));
 			rookPieceView.setPosition(new Position(3, rookY));
 		}
@@ -86,18 +105,18 @@ public class BoardController {
 		pieceView.setPosition(move.getToPosition());
 		boardView.highlightDoneMove(move);
 
-		boardState.makeMove(move);
+		boardModel.changeState(move);
 
 		// board state after move
 		if (move.isPromotion()) {
-			pieceView.setPiece(boardState.getPiece(move.getToPosition()));
+			pieceView.setPiece(boardModel.getPiece(move.getToPosition()));
 		}
-		boardState.getCheckedKing().ifPresent(boardView::highlightWarning);
+		boardModel.getCheckedKing().ifPresent(boardView::highlightWarning);
 	}
 
 	private void makeAIMove() {
 		boardView.resetHighlight();
-		makeMove(new PositionAnalysis().Analysis(boardState, 3, boardState.getSideToMove()));
+		makeMove(new PositionAnalysis().Analysis(boardModel, 3, boardModel.getSideToMove()));
 	}
 
 	private class InputHandler {
@@ -119,7 +138,7 @@ public class BoardController {
 				System.out.println("source: " + initialPosition);
 
 				boardView.resetHighlight();
-				legalMoves = boardState.getLegalMoves(initialPosition);
+				legalMoves = boardModel.getLegalMoves(initialPosition);
 				boardView.highlightPossibleMoves(legalMoves.stream().map(Move::getToPosition).collect(Collectors.toList()));
 				pieceView.setViewOrder(-1);
 			};
@@ -157,7 +176,7 @@ public class BoardController {
 					if (!moves.get(0).isPromotion()) {
 						move = moves.get(0);
 					} else {
-						Optional<Constants.PieceType> result = new PromotionDialog(boardState.getSideToMove())
+						Optional<Constants.PieceType> result = new PromotionDialog(boardModel.getSideToMove())
 								.showAndWait();
 						if (result.isPresent()) {
 							move = moves.stream().filter(m -> m.getPromotionPieceType() == result.get()).findFirst()

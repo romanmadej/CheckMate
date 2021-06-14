@@ -36,7 +36,7 @@ public class MenuController extends BasicController {
 	}
 
 	@FXML
-	private void playHotseatButtonOnClicked(MouseEvent mouseEvent) {
+	private void playHotseatButtonOnClicked(MouseEvent mouseEvent) throws IOException {
 		if (mouseEvent.getSource() != playHotseatButton) {
 			throw new UnsupportedOperationException("Incorrect button assigned");
 		}
@@ -44,14 +44,11 @@ public class MenuController extends BasicController {
 			return;
 		}
 		Stage stage = (Stage) ((Node) mouseEvent.getSource()).getScene().getWindow();
-		BoardController boardController = new BoardController(false);
-		stage.setY(stage.getY() - SQUARE_SIZE);
-		stage.setScene(new Scene(boardController.getView(), 8 * SQUARE_SIZE, 8 * SQUARE_SIZE));
-		stage.sizeToScene();
+		Navigator.navigateToBoardView(stage, false);
 	}
 
 	@FXML
-	private void playComputerButtonOnClicked(MouseEvent mouseEvent) {
+	private void playComputerButtonOnClicked(MouseEvent mouseEvent) throws IOException {
 		if (mouseEvent.getSource() != playComputerButton) {
 			throw new UnsupportedOperationException("Incorrect button assigned");
 		}
@@ -59,10 +56,7 @@ public class MenuController extends BasicController {
 			return;
 		}
 		Stage stage = (Stage) ((Node) mouseEvent.getSource()).getScene().getWindow();
-		BoardController boardController = new BoardController(true);
-		stage.setY(stage.getY() - SQUARE_SIZE);
-		stage.setScene(new Scene(boardController.getView(), 8 * SQUARE_SIZE, 8 * SQUARE_SIZE));
-		stage.sizeToScene();
+		Navigator.navigateToBoardView(stage, true);
 	}
 
 	@FXML
@@ -73,7 +67,6 @@ public class MenuController extends BasicController {
 		if (mouseEvent.getButton() != MouseButton.PRIMARY) {
 			return;
 		}
-		Stage stage = (Stage) ((Node) mouseEvent.getSource()).getScene().getWindow();
 		Parent parent = Navigator.loadView("/OptionsView.fxml", null);
 		Stage optionsStage = new Stage();
 		optionsStage.setScene(new Scene(parent, 6 * SQUARE_SIZE, 4 * SQUARE_SIZE));

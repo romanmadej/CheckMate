@@ -1,11 +1,11 @@
 package com.oop.checkmate.model.engine;
 
+import static com.oop.checkmate.model.engine.EngineConstants.Letters;
+
 import java.util.Objects;
 
 import com.oop.checkmate.Constants;
 import com.oop.checkmate.model.Position;
-
-import static com.oop.checkmate.model.engine.EngineConstants.Letters;
 
 public class Move {
 	/*
@@ -137,6 +137,14 @@ public class Move {
 
 	@Override
 	public String toString() {
-		return this.getFromSquare().name()+this.getToSquare().name() + "   " + this.getMoveType();
+		StringBuilder sb = new StringBuilder();
+		sb.append((this.getFromSquare().name() + " " + this.getToSquare().name()).toLowerCase());
+		if (this.isCastling()) {
+			sb.append(" castle");
+		}
+		if (this.isPromotion()) {
+			sb.append(" promotion");
+		}
+		return sb.toString();
 	}
 }

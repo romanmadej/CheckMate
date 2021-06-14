@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.oop.checkmate.controller.HistoryController"
+      prefWidth="200">
+    <ListView fx:id="historyListView"/>
+    <HBox alignment="CENTER" spacing="10" style="-fx-padding: 10 10 10 10;">
+        <Button fx:id="prevButton" text="←" onMouseClicked="#prevButtonOnClicked"/>
+        <Button fx:id="nextButton" text="→" onMouseClicked="#nextButtonOnClicked"/>
+        <Button fx:id="exitButton" text="Exit" onMouseClicked="#exitButtonOnClicked"/>
+    </HBox>
+</VBox>
