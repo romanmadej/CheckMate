@@ -30,8 +30,9 @@ public class Navigator {
 		}
 	}
 
-	public static void navigateToBoardView(Stage stage, boolean againstAI) throws IOException {
-		BoardController boardController = new BoardController(againstAI);
+	public static void navigateToBoardView(Stage stage, String fenString, boolean againstAI, boolean whiteBottom)
+			throws IOException {
+		BoardController boardController = new BoardController(fenString, againstAI, whiteBottom);
 
 		if (againstAI) {
 			stage.setY(stage.getY() - SQUARE_SIZE);

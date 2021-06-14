@@ -1,6 +1,7 @@
 package com.oop.checkmate.controller;
 
 import static com.oop.checkmate.Constants.SQUARE_SIZE;
+import static com.oop.checkmate.Constants.Color.BLACK;
 import static com.oop.checkmate.Constants.Color.WHITE;
 
 import java.util.List;
@@ -27,6 +28,8 @@ public class BoardController {
 	private final BoardView boardView;
 
 	private final boolean againstAI;
+	private final boolean whiteBottom;
+	private final Constants.Color bottomColor;
 
 	public BoardView getView() {
 		return boardView;
@@ -38,11 +41,16 @@ public class BoardController {
 
 	private final BoardModel boardModel;
 
-	public BoardController(boolean againstAI) {
-		this.boardView = new BoardView();
-		this.boardModel = new BoardModel();
+	public BoardController(String fenString, boolean againstAI, boolean whiteBottom) {
+		this.whiteBottom = whiteBottom;
+		this.bottomColor = whiteBottom ? WHITE : BLACK;
+		this.boardView = new BoardView(whiteBottom);
+		this.boardModel = new BoardModel(fenString);
 		this.againstAI = againstAI;
 		draw(boardModel);
+		if (againstAI && !whiteBottom) {
+			makeAIMove();
+		}
 	}
 
 	public void selectState(int index) {
@@ -63,12 +71,10 @@ public class BoardController {
 		for (int y = 0; y < 8; ++y) {
 			for (int x = 0; x < 8; ++x) {
 				Position position = new Position(x, y);
-				Piece piece = state.getPiece(position);
+				Piece piece = state.getPiece(position.rotate(!whiteBottom));
 				if (piece != Piece.NO_PIECE) {
 					PieceView pieceView = boardView.createPieceView(piece, position);
-
-					// todo add starting as black
-					if (!againstAI || piece.color == Constants.Color.WHITE) {
+					if (!againstAI || piece.color == bottomColor) {
 						pieceView.setOnMousePressed(inputHandler.mousePressedHandler(pieceView));
 						pieceView.setOnMouseDragged(inputHandler.mouseDraggedHandler(pieceView));
 						pieceView.setOnMouseReleased(inputHandler.mouseReleasedHandler(pieceView));
@@ -82,34 +88,37 @@ public class BoardController {
 
 	// make sure before calling that every PieceView is aligned in its square
 	private void makeMove(Move move) {
+		Position fromPosition = move.getFromPosition().rotate(!whiteBottom);
+		Position toPosition = move.getToPosition().rotate(!whiteBottom);
+
 		// board state before move
 		if (move.isRegularCapture() || (move.isPromotion() && move.isCapture())) {
-			boardView.getChildren().remove(boardView.getPieceView(move.getToPosition()));
+			boardView.getChildren().remove(boardView.getPieceView(toPosition));
 		}
 		if (move.isEpCapture()) {
-			int capturedY = boardModel.getSideToMove() == WHITE ? move.getToPosition().y + 1 : move.getToPosition().y - 1;
-			int capturedX = move.getToPosition().x;
+			int capturedY = boardModel.getSideToMove() == bottomColor ? toPosition.y + 1 : toPosition.y - 1;
+			int capturedX = toPosition.x;
 			boardView.getChildren().remove(boardView.getPieceView(new Position(capturedX, capturedY)));
 		}
 		if (move.isKingsideCastling()) {
-			int rookY = boardModel.getSideToMove() == WHITE ? 7 : 0;
+			int rookY = boardModel.getSideToMove() == bottomColor ? 7 : 0;
 			PieceView rookPieceView = boardView.getPieceView(new Position(7, rookY));
 			rookPieceView.setPosition(new Position(5, rookY));
 		}
 		if (move.isQueensideCastling()) {
-			int rookY = boardModel.getSideToMove() == WHITE ? 7 : 0;
+			int rookY = boardModel.getSideToMove() == bottomColor ? 7 : 0;
 			PieceView rookPieceView = boardView.getPieceView(new Position(0, rookY));
 			rookPieceView.setPosition(new Position(3, rookY));
 		}
-		PieceView pieceView = boardView.getPieceView(move.getFromPosition());
-		pieceView.setPosition(move.getToPosition());
+		PieceView pieceView = boardView.getPieceView(fromPosition);
+		pieceView.setPosition(toPosition);
 		boardView.highlightDoneMove(move);
 
 		boardModel.changeState(move);
 
 		// board state after move
 		if (move.isPromotion()) {
-			pieceView.setPiece(boardModel.getPiece(move.getToPosition()));
+			pieceView.setPiece(boardModel.getPiece(toPosition));
 		}
 		boardModel.getCheckedKing().ifPresent(boardView::highlightWarning);
 	}
@@ -138,8 +147,9 @@ public class BoardController {
 				System.out.println("source: " + initialPosition);
 
 				boardView.resetHighlight();
-				legalMoves = boardModel.getLegalMoves(initialPosition);
-				boardView.highlightPossibleMoves(legalMoves.stream().map(Move::getToPosition).collect(Collectors.toList()));
+				legalMoves = boardModel.getLegalMoves(initialPosition.rotate(!whiteBottom));
+				boardView.highlightPossibleMoves(
+						legalMoves.stream().map(Move::getToPosition).collect(Collectors.toList()));
 				pieceView.setViewOrder(-1);
 			};
 		}
@@ -168,7 +178,8 @@ public class BoardController {
 				Position position = new Position(x, y);
 				System.out.println("target: " + position + " (" + centerX + ", " + centerY + ")");
 
-				List<Move> moves = legalMoves.stream().filter(m -> m.getToPosition().equals(position))
+				List<Move> moves = legalMoves.stream()
+						.filter(m -> m.getToPosition().equals(position.rotate(!whiteBottom)))
 						.collect(Collectors.toList());
 
 				Move move = null;

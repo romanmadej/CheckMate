@@ -44,7 +44,8 @@ public class MenuController extends BasicController {
 			return;
 		}
 		Stage stage = (Stage) ((Node) mouseEvent.getSource()).getScene().getWindow();
-		Navigator.navigateToBoardView(stage, false);
+		Parent parent = Navigator.loadView("/GameLaunchView.fxml", Map.of("againstAI", false));
+		stage.getScene().setRoot(parent);
 	}
 
 	@FXML
@@ -56,7 +57,8 @@ public class MenuController extends BasicController {
 			return;
 		}
 		Stage stage = (Stage) ((Node) mouseEvent.getSource()).getScene().getWindow();
-		Navigator.navigateToBoardView(stage, true);
+		Parent parent = Navigator.loadView("/GameLaunchView.fxml", Map.of("againstAI", true));
+		stage.getScene().setRoot(parent);
 	}
 
 	@FXML

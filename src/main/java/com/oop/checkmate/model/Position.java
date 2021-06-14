@@ -36,4 +36,11 @@ public class Position {
 	public String toString() {
 		return "Position{" + "x=" + x + ", y=" + y + '}';
 	}
+
+	public Position rotate(boolean blackBottom) {
+		if (!blackBottom) {
+			return this;
+		}
+		return new Position(7 - x, 7 - y);
+	}
 }

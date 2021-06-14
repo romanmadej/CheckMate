@@ -18,7 +18,7 @@ import javafx.scene.shape.Rectangle;
 public class BoardView extends Group {
 	private final Rectangle[][] overlayTiles = new Rectangle[8][8];
 
-	public BoardView() {
+	public BoardView(boolean whiteBottom) {
 		final Color light = UserPreferences.getLightTileColor();
 		final Color dark = UserPreferences.getDarkTileColor();
 
@@ -39,6 +39,11 @@ public class BoardView extends Group {
 			}
 		}
 		this.getChildren().add(highlightBoard);
+
+		if (!whiteBottom) {
+			board.setRotate(180);
+			highlightBoard.setRotate(180);
+		}
 	}
 
 	public PieceView createPieceView(Piece piece, Position position) {

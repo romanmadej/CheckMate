@@ -10,10 +10,6 @@ public class BoardModel extends BoardState {
 	private int position = 0;
 	public final ObservableList<StateInfo> states = FXCollections.observableArrayList();
 
-	public BoardModel() {
-		this("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
-	}
-
 	public BoardModel(String fenString) {
 		super(fenString);
 		states.add(super.toStateInfo());

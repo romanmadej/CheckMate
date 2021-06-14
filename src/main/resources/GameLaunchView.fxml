@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<HBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.oop.checkmate.controller.GameLaunchController"
+      alignment="CENTER" spacing="10">
+    <VBox alignment="CENTER" spacing="10">
+        <HBox alignment="CENTER_RIGHT" spacing="10">
+            <Label text="Bottom pieces:"/>
+            <ChoiceBox fx:id="pieceColorChoiceBox" prefWidth="100"/>
+        </HBox>
+        <HBox alignment="CENTER_RIGHT" spacing="10">
+            <Label text="Game mode:"/>
+            <ChoiceBox fx:id="gameModeChoiceBox" prefWidth="100"/>
+        </HBox>
+        <Separator maxWidth="128"/>
+        <Button fx:id="playButton" text="Play" prefWidth="165" onMouseClicked="#playButtonOnClicked"/>
+        <Separator maxWidth="128"/>
+        <Button fx:id="backButton" text="Back" prefWidth="165" onMouseClicked="#backButtonOnClicked"/>
+    </VBox>
+</HBox>
