@@ -21,6 +21,7 @@ import com.oop.checkmate.view.PromotionDialog;
 
 import javafx.event.EventHandler;
 import javafx.scene.Cursor;
+import javafx.scene.control.Alert;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 
@@ -120,7 +121,16 @@ public class BoardController {
 		if (move.isPromotion()) {
 			pieceView.setPiece(boardModel.getPiece(toPosition));
 		}
-		boardModel.getCheckedKing().ifPresent(boardView::highlightWarning);
+
+		Optional<Position> checkedKing = boardModel.getCheckedKing();
+
+		checkedKing.ifPresent(boardView::highlightWarning);
+
+		if (boardModel.generateLegalMoves().isEmpty()) {
+			Alert alert = new Alert(Alert.AlertType.INFORMATION);
+			alert.setHeaderText(checkedKing.isPresent() ? "Checkmate!" : "Stalemate!");
+			alert.show();
+		}
 	}
 
 	private void makeAIMove() {
