@@ -2,15 +2,12 @@ package com.oop.checkmate.view;
 
 import static com.oop.checkmate.Constants.SQUARE_SIZE;
 
-import java.util.NoSuchElementException;
-
 import com.oop.checkmate.UserPreferences;
 import com.oop.checkmate.model.Piece;
 import com.oop.checkmate.model.Position;
 import com.oop.checkmate.model.engine.Move;
 
 import javafx.scene.Group;
-import javafx.scene.Node;
 import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
@@ -51,20 +48,6 @@ public class BoardView extends Group {
 		pieceView.setPosition(position);
 		this.getChildren().add(pieceView);
 		return pieceView;
-	}
-
-	public PieceView getPieceView(Position position) {
-		for (Node node : this.getChildren()) {
-			if (!(node instanceof PieceView)) {
-				continue;
-			}
-			PieceView pieceView = (PieceView) node;
-			if (pieceView.getPosition().equals(position)) {
-				System.out.println("found " + pieceView.getImage().getUrl());
-				return pieceView;
-			}
-		}
-		throw new NoSuchElementException();
 	}
 
 	private void highlightTile(Position position, Color color) {

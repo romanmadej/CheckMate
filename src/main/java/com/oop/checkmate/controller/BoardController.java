@@ -54,18 +54,6 @@ public class BoardController {
 		}
 	}
 
-	public void selectState(int index) {
-		boardModel.selectState(index);
-		draw(boardModel);
-		boardView.resetHighlight();
-
-		Move move = boardModel.getLastMove();
-		if (move != null) {
-			boardView.highlightDoneMove(move);
-			boardModel.getCheckedKing().ifPresent(boardView::highlightWarning);
-		}
-	}
-
 	private void draw(BoardState state) {
 		boardView.getChildren().removeIf(node -> node instanceof PieceView);
 		InputHandler inputHandler = new InputHandler();
@@ -85,47 +73,18 @@ public class BoardController {
 				}
 			}
 		}
+		boardView.resetHighlight();
+		Move move = boardModel.getLastMove();
+		if (move != null) {
+			boardView.highlightDoneMove(move);
+			boardModel.getCheckedKing().ifPresent(boardView::highlightWarning);
+		}
 	}
 
-	// make sure before calling that every PieceView is aligned in its square
 	private void makeMove(Move move) {
-		Position fromPosition = move.getFromPosition().rotate(!whiteBottom);
-		Position toPosition = move.getToPosition().rotate(!whiteBottom);
-
-		// board state before move
-		if (move.isRegularCapture() || (move.isPromotion() && move.isCapture())) {
-			boardView.getChildren().remove(boardView.getPieceView(toPosition));
-		}
-		if (move.isEpCapture()) {
-			int capturedY = boardModel.getSideToMove() == bottomColor ? toPosition.y + 1 : toPosition.y - 1;
-			int capturedX = toPosition.x;
-			boardView.getChildren().remove(boardView.getPieceView(new Position(capturedX, capturedY)));
-		}
-		if (move.isKingsideCastling()) {
-			int rookY = boardModel.getSideToMove() == bottomColor ? 7 : 0;
-			PieceView rookPieceView = boardView.getPieceView(new Position(7, rookY));
-			rookPieceView.setPosition(new Position(5, rookY));
-		}
-		if (move.isQueensideCastling()) {
-			int rookY = boardModel.getSideToMove() == bottomColor ? 7 : 0;
-			PieceView rookPieceView = boardView.getPieceView(new Position(0, rookY));
-			rookPieceView.setPosition(new Position(3, rookY));
-		}
-		PieceView pieceView = boardView.getPieceView(fromPosition);
-		pieceView.setPosition(toPosition);
-		boardView.highlightDoneMove(move);
-
 		boardModel.changeState(move);
-
-		// board state after move
-		if (move.isPromotion()) {
-			pieceView.setPiece(boardModel.getPiece(toPosition));
-		}
-
+		draw(boardModel);
 		Optional<Position> checkedKing = boardModel.getCheckedKing();
-
-		checkedKing.ifPresent(boardView::highlightWarning);
-
 		if (boardModel.generateLegalMoves().isEmpty()) {
 			Alert alert = new Alert(Alert.AlertType.INFORMATION);
 			alert.setHeaderText(checkedKing.isPresent() ? "Checkmate!" : "Stalemate!");
@@ -134,8 +93,12 @@ public class BoardController {
 	}
 
 	private void makeAIMove() {
-		boardView.resetHighlight();
 		makeMove(new PositionAnalysis().Analysis(boardModel, 3, boardModel.getSideToMove()));
+	}
+
+	public void selectState(int index) {
+		boardModel.selectState(index);
+		draw(boardModel);
 	}
 
 	private class InputHandler {
