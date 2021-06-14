@@ -10,12 +10,10 @@ import com.oop.checkmate.Navigator;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
-import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 public class MenuController extends BasicController {
@@ -69,14 +67,9 @@ public class MenuController extends BasicController {
 		if (mouseEvent.getButton() != MouseButton.PRIMARY) {
 			return;
 		}
+		Stage stage = (Stage) ((Node) mouseEvent.getSource()).getScene().getWindow();
 		Parent parent = Navigator.loadView("/OptionsView.fxml", null);
-		Stage optionsStage = new Stage();
-		optionsStage.setScene(new Scene(parent, 6 * SQUARE_SIZE, 4 * SQUARE_SIZE));
-		optionsStage.sizeToScene();
-		optionsStage.setTitle("Options");
-		optionsStage.setResizable(false);
-		optionsStage.initModality(Modality.APPLICATION_MODAL);
-		optionsStage.show();
+		stage.getScene().setRoot(parent);
 	}
 
 	public void exitButtonOnClicked(MouseEvent mouseEvent) {

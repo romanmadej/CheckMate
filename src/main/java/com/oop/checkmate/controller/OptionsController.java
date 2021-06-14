@@ -1,10 +1,12 @@
 package com.oop.checkmate.controller;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.oop.checkmate.Navigator;
 import com.oop.checkmate.UserPreferences;
 
 import javafx.beans.binding.BooleanBinding;
@@ -13,6 +15,7 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
+import javafx.scene.Parent;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
@@ -146,7 +149,7 @@ public class OptionsController extends BasicController {
 		darkColorPicker.setValue(currentDarkTileColor.getValue());
 	}
 
-	public void doneButtonOnClicked(MouseEvent mouseEvent) {
+	public void doneButtonOnClicked(MouseEvent mouseEvent) throws IOException {
 		if (mouseEvent.getSource() != doneButton) {
 			throw new UnsupportedOperationException("Incorrect button assigned");
 		}
@@ -154,6 +157,7 @@ public class OptionsController extends BasicController {
 			return;
 		}
 		Stage stage = (Stage) ((Node) mouseEvent.getSource()).getScene().getWindow();
-		stage.close();
+		Parent parent = Navigator.loadView("/MenuView.fxml", null);
+		stage.getScene().setRoot(parent);
 	}
 }
