@@ -26,7 +26,7 @@ import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
 
-public class OptionsController extends BasicController {
+public class OptionsController implements BasicController {
 	@FXML
 	private ChoiceBox<UserPreferences.PieceSet> pieceSetChoiceBox;
 	@FXML

@@ -16,7 +16,7 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
 
-public class MenuController extends BasicController {
+public class MenuController implements BasicController {
 	@FXML
 	private ImageView logoImageView;
 	@FXML

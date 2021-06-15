@@ -19,7 +19,7 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
 
-public class HistoryController extends BasicController {
+public class HistoryController implements BasicController {
 	@FXML
 	private Button prevButton;
 	@FXML

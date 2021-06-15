@@ -16,7 +16,7 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
 
-public class GameLaunchController extends BasicController {
+public class GameLaunchController implements BasicController {
 	@FXML
 	private ChoiceBox<String> pieceColorChoiceBox;
 	@FXML
