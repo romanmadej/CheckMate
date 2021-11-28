@@ -1,48 +1,41 @@
 # CheckMate
 
-Projekt na kurs Programowanie Obiektowe 2020/2021.
+Project for the 2020/2021 Object Oriented Programming course.
 
-CheckMate to aplikacja do prowadzenia rozgrywki w szachy. Użytkownik steruje bierkami przez przeciąganie myszy.
-Zaimplementowane jest podświetlanie:
+CheckMate is an application for playing chess. The user controls the pawns by dragging the mouse.
 
-- możliwych ruchów podnoszonej figury,
-- ostatniego wykonanego ruchu,
-- szachowanego króla.
+The generated moves are fully legal, in particular the following special moves are supported:
 
-Generowane ruchy są w pełni legalne, w szczególności specjalnie obsługiwane są ruchy takie jak:
+- en passant,
+- castling,
+- pawn promotions,
+- check,
+- stalemate and checkmate.
 
-- bicia w przelocie,
-- roszady,
-- promocje pionów,
-- szach,
-- pat oraz mat.
+During the game the following are highlighted:
 
-Możliwe tryby gry to standardowy i Chess960. Rozgrywkę można prowadzić z przeciwnikiem w trybie hotseat lub z prostym
-silnikiem komputerowym.
+- possible moves for the raised piece,
+- the last move made,
+- king in check.
 
-W trybie hotseat dodatkowo gracz ma podgląd na listę historii ruchów, po której może nawigować strzałkami lub naciskając
-odpowiednią komórkę na liście. Wybranie danego stanu gry jest odzwierciedlane na planszy; gracz może cofnąć ruchy i
-poprowadzić rozgrywkę w inny sposób.
+Possible game modes are standard and Chess960. The game can be played against an opponent in hotseat mode or against a simple computer engine.
 
-Widok planszy ma personalizowane kolory. Dodana także została możliwość wyboru wyglądu bierek.
+In hotseat mode, the players additionally have a move history list available, which can be navigated by arrows or by selecting cells. Selecting a particular game state is reflected on the board; players can go back to the historical state and play the rest of the game in an alternative way.
 
-## Uruchamianie
+The pawns and board colors are customizable.
 
-Plik jar aplikacji można pobrać w zakładce *Releases*. Aplikacja wykorzystuje platformę JavaFX.
+## Launching
 
-Ze strony [https://gluonhq.com/products/javafx/](https://gluonhq.com/products/javafx/) w sekcji *Latest release* można
-aktualnie pobrać JavaFX SDK w wersji 16. Do uruchomienia aplikacji będziemy potrzebowali ścieżkę do folderu lib z
-pobranej paczki.
+The application jar file can be downloaded from the *Releases* tab. The application uses the JavaFX SDK, which can be downloaded from [https://gluonhq.com/products/javafx/](https://gluonhq.com/products/javafx/) (at the time of writing in version 17).
 
-W celu uruchomienia aplikacji należy wykonać poniższe polecenie, zamieniając `PATH_TO_JAVAFX_SDK` na odpowiednią
-ścieżkę.
+To run the application, run the following command, replacing `PATH_TO_JAVAFX_SDK` with the appropriate path.
 
 ```
 java --module-path PATH_TO_JAVAFX_SDK/lib --add-modules=javafx.controls,javafx.fxml -jar Checkmate.jar
 ```
 
-## Zrzuty ekranu
+## Screenshots
 
-![zrzut ekranu 1](./Screenshots/screenshot1.png "Zrzut ekranu 1")
+![screenshot 1](./Screenshots/screenshot1.png "Screenshot 1")
 
-![zrzut ekranu 2](./Screenshots/screenshot2.png "Zrzut ekranu 2")
+![screenshot 2](./Screenshots/screenshot2.png "Screenshot 2")
